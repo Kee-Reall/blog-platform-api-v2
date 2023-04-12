@@ -1,5 +1,5 @@
-import { CookieOptions } from 'express';
 import { exceptionFactory } from './exceptionFactory.function';
+import { CookieSerializeOptions } from '@fastify/cookie';
 
 type EnvironmentsTypes = 'DEVELOPMENT' | 'STAGING' | 'PRODUCTION';
 
@@ -67,7 +67,7 @@ class AppConfig {
     return this.environment.JWT_SECRET;
   }
 
-  get cookiesOptions(): CookieOptions {
+  get cookiesOptions(): CookieSerializeOptions {
     return {
       //domain: this.mode.isDevelopment() ? undefined : this.environment.DOMAIN,
       sameSite: 'none',
