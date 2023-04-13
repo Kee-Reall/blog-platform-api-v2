@@ -7,6 +7,7 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  ParseIntPipe,
   Post,
   Put,
   Query,
@@ -34,13 +35,16 @@ export class AdminUsersController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  public async deleteUser(@Param('id') userId: string) {
+  public async deleteUser(@Param('id', ParseIntPipe) userId: number) {
     return await this.commandBus.execute(new adminCommand.DeleteUser(userId));
   }
 
   @Put(':id/ban')
   @HttpCode(HttpStatus.NO_CONTENT)
-  public async banUser(@Param('id') userId: string, @Body() dto: BanUserInput) {
+  public async banUser(
+    @Param('id', ParseIntPipe) userId: number,
+    @Body() dto: BanUserInput,
+  ) {
     return await this.commandBus.execute(new adminCommand.BanUser(userId, dto));
   }
 }

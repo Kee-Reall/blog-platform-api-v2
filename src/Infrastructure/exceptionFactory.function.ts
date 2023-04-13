@@ -1,7 +1,7 @@
 import { ValidationError } from 'class-validator';
 import { BadRequestException } from '@nestjs/common';
 
-export function exceptionFactory(errors: Array<ValidationError>) {
+export function exceptionFactory(errors: Array<ValidationError>): void {
   const fields = [];
   throw new BadRequestException({
     errorsMessages: errors
