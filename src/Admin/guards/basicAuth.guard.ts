@@ -1,17 +1,15 @@
+import { FastifyRequest } from 'fastify';
 import {
   CanActivate,
   ExecutionContext,
   UnauthorizedException,
 } from '@nestjs/common';
-import { Observable } from 'rxjs';
-import { Request } from 'express';
 import { appConfig } from '../../Infrastructure';
 
 export class BasicAuthGuard implements CanActivate {
-  canActivate(
-    context: ExecutionContext,
-  ): boolean | Promise<boolean> | Observable<boolean> {
-    const req = context.switchToHttp().getRequest<Request>();
+  public canActivate(context: ExecutionContext): boolean {
+    console.log('inside guard');
+    const req = context.switchToHttp().getRequest<FastifyRequest>();
     const authorization = req.headers.authorization;
     if (!authorization) {
       throw new UnauthorizedException();
@@ -29,6 +27,7 @@ export class BasicAuthGuard implements CanActivate {
     const isAdmin: boolean =
       login === adminLogin && password === adminPassword && type === 'Basic';
     if (!isAdmin) {
+      console.log('here');
       throw new UnauthorizedException();
     }
     return isAdmin;

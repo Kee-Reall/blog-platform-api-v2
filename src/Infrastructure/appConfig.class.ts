@@ -1,5 +1,6 @@
 import { exceptionFactory } from './exceptionFactory.function';
 import { CookieSerializeOptions } from '@fastify/cookie';
+import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 
 type EnvironmentsTypes = 'DEVELOPMENT' | 'STAGING' | 'PRODUCTION';
 
@@ -84,6 +85,18 @@ class AppConfig {
     return this.mode.getMode();
   }
 
+  get dbOptions(): TypeOrmModuleOptions {
+    return {
+      type: 'postgres',
+      host: 'localhost',
+      port: 5432,
+      username: 'nodejs',
+      password: 'nodejs',
+      database: 'ht17-dev',
+      synchronize: false,
+      autoLoadEntities: false,
+    };
+  }
   get globalValidatorOptions() {
     return { transform: true, exceptionFactory: exceptionFactory };
   }

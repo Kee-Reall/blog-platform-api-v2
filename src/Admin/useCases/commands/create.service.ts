@@ -1,6 +1,7 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { ErrorMessage, UserInputModel } from '../../../Model';
 import { MessageENUM } from '../../../Base';
+import { AdminQueryRepository } from '../../repos/admin-query.repository';
 
 export class CreateUser implements UserInputModel {
   email: string;
@@ -18,25 +19,10 @@ export type AdminPresentation = any;
 
 @CommandHandler(CreateUser)
 export class CreateUserUseCase implements ICommandHandler<CreateUser> {
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  constructor(/*private commandRepo: AdminCommandRepository,*/) {}
-  public async execute({
-    login,
-    email,
-    password,
-  }: CreateUser): Promise<AdminPresentation> {
-    // const user = new this.model({ login, email });
-    // const [isUnique, fieldsArray] = await user.isFieldsUnique();
-    // if (!isUnique) {
-    //   throw new BadRequestException(this.generateNotUniqueError(fieldsArray));
-    // }
-    // await user.setHash(password);
-    // user.confirm();
-    // const isSaved: boolean = await this.commandRepo.saveUser(user);
-    // if (!isSaved) {
-    //   throw new ImATeapotException();
-    // }
-    // return { ...user.toJSON(), banInfo: user.banInfo };
+  constructor(private queryRepo: AdminQueryRepository) {}
+  public async execute(command: CreateUser): Promise<AdminPresentation> {
+    const user = await this.queryRepo.getUserByLoginOrEmail();
+    console.log(user)
     return;
   }
 
