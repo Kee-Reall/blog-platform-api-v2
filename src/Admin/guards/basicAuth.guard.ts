@@ -8,7 +8,6 @@ import { appConfig } from '../../Infrastructure';
 
 export class BasicAuthGuard implements CanActivate {
   public canActivate(context: ExecutionContext): boolean {
-    console.log('inside guard');
     const req = context.switchToHttp().getRequest<FastifyRequest>();
     const authorization = req.headers.authorization;
     if (!authorization) {
@@ -27,7 +26,6 @@ export class BasicAuthGuard implements CanActivate {
     const isAdmin: boolean =
       login === adminLogin && password === adminPassword && type === 'Basic';
     if (!isAdmin) {
-      console.log('here');
       throw new UnauthorizedException();
     }
     return isAdmin;

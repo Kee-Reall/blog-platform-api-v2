@@ -2,6 +2,8 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { ErrorMessage, UserInputModel } from '../../../Model';
 import { MessageENUM } from '../../../Base';
 import { AdminQueryRepository } from '../../repos/admin-query.repository';
+import { BadRequestException } from '@nestjs/common';
+import { DbRowMessage } from '../../../Model/Types/dbTransfers.types';
 
 export class CreateUser implements UserInputModel {
   email: string;
@@ -21,17 +23,22 @@ export type AdminPresentation = any;
 export class CreateUserUseCase implements ICommandHandler<CreateUser> {
   constructor(private queryRepo: AdminQueryRepository) {}
   public async execute(command: CreateUser): Promise<AdminPresentation> {
-    const user = await this.queryRepo.getUserByLoginOrEmail();
-    console.log(user)
+    const errors = await this.queryRepo.getUserByLoginOrEmail(
+      command.login,
+      command.email,
+    );
+    if (errors.length > 0) {
+      throw new BadRequestException(this.generateNotUniqueError(errors));
+    }
     return;
   }
 
-  private generateNotUniqueError(fields: string[]): {
+  private generateNotUniqueError(rows: DbRowMessage[]): {
     errorsMessages: ErrorMessage[];
   } {
-    const errorsMessages = fields.map((field) => ({
+    const errorsMessages: ErrorMessage[] = rows.map((row) => ({
       message: MessageENUM.ALREADY_EXISTS,
-      field,
+      field: row.field,
     }));
     return { errorsMessages };
   }
