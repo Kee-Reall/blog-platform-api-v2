@@ -1,9 +1,15 @@
+import { BadRequestException, ImATeapotException } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { ErrorMessage, UserInputModel } from '../../../Model';
 import { MessageENUM } from '../../../Base';
 import { AdminQueryRepository } from '../../repos/admin-query.repository';
-import { BadRequestException } from '@nestjs/common';
-import { DbRowMessage } from '../../../Model/Types/dbTransfers.types';
+import {
+  DbRowMessage,
+  ErrorMessage,
+  UserInputModel,
+  UserCreationModel,
+} from '../../../Model';
+import { AdminCommandRepository } from '../../repos/admin-command.repository';
+import { hash as genHash, genSalt } from 'bcrypt';
 
 export class CreateUser implements UserInputModel {
   email: string;
@@ -21,17 +27,27 @@ export type AdminPresentation = any;
 
 @CommandHandler(CreateUser)
 export class CreateUserUseCase implements ICommandHandler<CreateUser> {
-  constructor(private queryRepo: AdminQueryRepository) {}
+  constructor(
+    private queryRepo: AdminQueryRepository,
+    private commandRepo: AdminCommandRepository,
+  ) {}
   public async execute(command: CreateUser): Promise<AdminPresentation> {
-    const errors = await this.queryRepo.getUserByLoginOrEmail(
+    const errors = await this.queryRepo.checkUniqueUser(
       command.login,
       command.email,
     );
     if (errors.length > 0) {
       throw new BadRequestException(this.generateNotUniqueError(errors));
     }
-    // логика создания
-    return;
+    const dto: UserCreationModel = {
+      login: command.login,
+      email: command.email,
+      hash: await genHash(command.password, await genSalt(8)),
+    };
+    const isSaved: boolean = await this.commandRepo.createUser(dto);
+    if (!isSaved) {
+      throw new ImATeapotException();
+    }
   }
 
   private generateNotUniqueError(rows: DbRowMessage[]): {

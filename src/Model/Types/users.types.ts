@@ -91,3 +91,7 @@ export type UserForBloggerPresentation = {
     banReason?: Nullable<string>;
   };
 };
+
+export type UserCreationModel = Omit<UserInputModel, 'password'> & {
+  hash: string;
+};

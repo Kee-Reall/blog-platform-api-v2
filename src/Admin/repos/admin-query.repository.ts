@@ -1,13 +1,13 @@
+import { DataSource } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
-import { DbRowMessage } from '../../Model/Types/dbTransfers.types';
+import { DbRowMessage } from '../../Model';
 
 @Injectable()
 export class AdminQueryRepository {
   constructor(@InjectDataSource() private ds: DataSource) {}
 
-  public async getUserByLoginOrEmail(
+  public async checkUniqueUser(
     login: string,
     email: string,
   ): Promise<DbRowMessage[]> {

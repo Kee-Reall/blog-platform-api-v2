@@ -1,4 +1,5 @@
 export * from './auth.metadata.types';
+export * from './dbTransfers.types';
 export * from './pagination.types';
 export * from './comments.types';
 export * from './response.type';
