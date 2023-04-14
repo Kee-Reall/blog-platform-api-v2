@@ -30,6 +30,7 @@ export class CreateUserUseCase implements ICommandHandler<CreateUser> {
     if (errors.length > 0) {
       throw new BadRequestException(this.generateNotUniqueError(errors));
     }
+    // логика создания
     return;
   }
 

@@ -88,11 +88,11 @@ class AppConfig {
   get dbOptions(): TypeOrmModuleOptions {
     return {
       type: 'postgres',
-      host: 'localhost',
-      port: 5432,
-      username: 'nodejs',
-      password: 'nodejs',
-      database: 'ht17-dev',
+      host: this.environment.DB_HOST,
+      port: this.environment.DB_PORT,
+      username: this.environment.DB_LOGIN,
+      password: this.environment.DB_PASSWORD,
+      database: this.environment.DB_NAME,
       synchronize: false,
       autoLoadEntities: false,
     };
