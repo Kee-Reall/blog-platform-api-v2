@@ -34,8 +34,6 @@ export class LoginUseCase
     if (!user || !user.isConfirmed || user.isBanned) {
       throw new UnauthorizedException();
     }
-    console.log(typeof command.password);
-    console.log(typeof user.hash);
     const isPasswordValid = await compare(command.password, user.hash);
     if (!isPasswordValid) {
       throw new UnauthorizedException();
