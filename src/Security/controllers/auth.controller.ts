@@ -33,6 +33,7 @@ import { JwtGuard, Meta } from '../../Base';
 import { FastifyReply } from 'fastify';
 import { CookieSerializeOptions } from '@fastify/cookie';
 import { RefreshJwtAuthGuard } from '../guard';
+import { command } from '../useCases';
 
 @Controller('api/auth')
 export class AuthController {
@@ -50,7 +51,7 @@ export class AuthController {
     @Body() dto: LoginInput,
     @Ip() ip: string,
   ) /*: Promise<Pick<TokenPair, 'accessToken'>>*/ {
-    return;
+    return this.commandBus.execute(new command.Login(agent, ip, dto));
     // const tokenPair: TokenPair = await this.commandBus.execute(
     //   new command.Login(agent, ip, dto),
     // );
