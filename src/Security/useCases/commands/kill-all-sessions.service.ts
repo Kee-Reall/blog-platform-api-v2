@@ -1,13 +1,12 @@
 import { SessionJwtMeta, VoidPromise } from '../../../Model';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { UnauthorizedException } from '@nestjs/common';
 import { SecurityService } from '../base';
 import { AuthCommandRepository, AuthQueryRepository } from '../../repos';
 
 export class KillAllSessionsExcludeCurrent implements SessionJwtMeta {
   deviceId: string;
   updateDate: string;
-  userId: string;
+  userId: number;
   constructor(dto: SessionJwtMeta) {
     this.updateDate = dto.updateDate;
     this.userId = dto.userId;

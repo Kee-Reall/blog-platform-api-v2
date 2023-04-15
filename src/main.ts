@@ -14,10 +14,10 @@ async function bootstrap() {
     AppModule,
     new FastifyAdapter(),
   );
-  await app.register(cookie, { secret: 'pohkakoysecret' });
+  await app.register(cookie, { secret: appConfig.cookieSecret });
   app.useGlobalPipes(new ValidationPipe(appConfig.globalValidatorOptions));
   app.useGlobalFilters(new GlobalHTTPFilter());
-  const port = 3000;
+  const port = appConfig.port;
   await app.listen(port, () =>
     console.log('Api is listening :' + port + ' port'),
   );

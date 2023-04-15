@@ -4,6 +4,7 @@ import { ImATeapotException, UnauthorizedException } from '@nestjs/common';
 import { AuthCommandRepository, AuthQueryRepository } from '../../repos';
 import { SecurityService } from '../base';
 import { UserLoginModel, WithClientMeta } from '../../../Model';
+import { compare } from 'bcrypt';
 
 export class Login implements WithClientMeta<UserLoginModel> {
   public loginOrEmail: string;
@@ -30,14 +31,24 @@ export class LoginUseCase
     const user = await this.queryRepo.getUserByLoginOrEmail(
       command.loginOrEmail,
     );
-    // const user = await this.userModel.findByLoginOrEmail(command.loginOrEmail);
-    // if (!user || !user.confirmation.isConfirmed || user.banInfo.isBanned) {
-    //   throw new UnauthorizedException();
-    // }
-    // const isPasswordValid = await user.comparePasswords(command.password);
-    // if (!isPasswordValid) {
-    //   throw new UnauthorizedException();
-    // }
+    if (!user || !user.isConfirmed || user.isBanned) {
+      throw new UnauthorizedException();
+    }
+    console.log(typeof command.password);
+    console.log(typeof user.hash);
+    const isPasswordValid = await compare(command.password, user.hash);
+    if (!isPasswordValid) {
+      throw new UnauthorizedException();
+    }
+    const session = await this.commandRepo.createSession(
+      user.id,
+      command.agent,
+      command.ip,
+    );
+    if (!session) {
+      throw new ImATeapotException();
+    }
+    return this.generateTokenPair(this.jwtService, session);
     // const session = new this.sessionModel({
     //   userId: user._id,
     //   title: command.agent,

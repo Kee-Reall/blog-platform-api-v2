@@ -7,7 +7,7 @@ import { NullablePromise, SessionJwtMeta } from '../../../Model';
 export class GetSessions implements SessionJwtMeta {
   deviceId: string;
   updateDate: string;
-  userId: string;
+  userId: number;
   constructor(dto: SessionJwtMeta) {
     this.deviceId = dto.deviceId;
     this.updateDate = dto.updateDate;

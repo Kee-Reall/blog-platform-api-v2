@@ -9,7 +9,7 @@ export interface SessionMetadata {
 }
 
 export interface SessionJwtMeta {
-  userId: string;
+  userId: number;
   deviceId: string;
   updateDate: string;
 }
@@ -34,7 +34,8 @@ export interface SessionFilter<T = string> {
 }
 
 export interface RefreshTokenDbResponse {
-  deviceId: string;
+  userId: number;
+  deviceId: number;
   updateDate: Date;
 }
 

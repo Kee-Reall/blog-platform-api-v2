@@ -50,17 +50,16 @@ export class AuthController {
     @Headers('user-agent') agent: string,
     @Body() dto: LoginInput,
     @Ip() ip: string,
-  ) /*: Promise<Pick<TokenPair, 'accessToken'>>*/ {
-    return this.commandBus.execute(new command.Login(agent, ip, dto));
-    // const tokenPair: TokenPair = await this.commandBus.execute(
-    //   new command.Login(agent, ip, dto),
-    // );
-    // reply.setCookie(
-    //   'refreshToken',
-    //   tokenPair.refreshToken,
-    //   this.cookiesOptions,
-    // );
-    // return { accessToken: tokenPair.accessToken };
+  ): Promise<Pick<TokenPair, 'accessToken'>> {
+    const tokenPair: TokenPair = await this.commandBus.execute(
+      new command.Login(agent, ip, dto),
+    );
+    reply.setCookie(
+      'refreshToken',
+      tokenPair.refreshToken,
+      this.cookiesOptions,
+    );
+    return { accessToken: tokenPair.accessToken };
   }
 
   // @Get('me')

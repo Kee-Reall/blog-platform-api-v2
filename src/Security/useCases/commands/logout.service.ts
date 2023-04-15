@@ -8,7 +8,7 @@ export class Logout implements SessionJwtMeta {
   deviceId: string;
 
   updateDate: string;
-  userId: string;
+  userId: number;
   constructor(meta: SessionJwtMeta) {
     this.deviceId = meta.deviceId;
     this.updateDate = meta.updateDate;

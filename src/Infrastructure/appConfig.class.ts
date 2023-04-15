@@ -1,6 +1,7 @@
 import { exceptionFactory } from './exceptionFactory.function';
 import { CookieSerializeOptions } from '@fastify/cookie';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { MailerOptions } from '@nestjs-modules/mailer';
 
 type EnvironmentsTypes = 'DEVELOPMENT' | 'STAGING' | 'PRODUCTION';
 
@@ -30,11 +31,11 @@ class AppConfig {
     this.environment = process.env;
   }
 
-  get mailOptions() {
+  get mailOptions(): MailerOptions {
     return {
       transport: `smtps://${this.environment.MAIL_NAME}:${this.environment.MAIL_PASSWORD}@smtp.${this.environment.MAIL_DOMAIN}`,
       defaults: {
-        from: `"Blog-platform-api" <${this.environment.MAIL_NAME}>`,
+        from: `"Blog-platform-api-v2" <${this.environment.MAIL_NAME}>`,
       },
     };
   }
@@ -103,6 +104,10 @@ class AppConfig {
 
   get globalContainerOptions() {
     return { fallbackOnErrors: true };
+  }
+
+  get cookieSecret(): string {
+    return this.environment.COOKIES_SECRET;
   }
 }
 

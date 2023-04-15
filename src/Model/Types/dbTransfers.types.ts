@@ -7,3 +7,10 @@ export interface OperationResult<Payload = any> {
 }
 
 export type CreationResult = OperationResult<{ id: number }>;
+
+export type UserForLogin = {
+  id: number;
+  hash: string;
+  isBanned: boolean;
+  isConfirmed: boolean;
+};
