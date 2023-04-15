@@ -15,11 +15,11 @@ export interface SessionJwtMeta {
 }
 
 export interface AccessTokenMeta {
-  userId: string;
+  userId: number;
 }
 
 export interface SoftGuardMeta extends AccessTokenMeta {
-  userId: string | null;
+  userId: number | null;
 }
 
 export interface AccessTokenPayload extends JwtPayload, AccessTokenMeta {}

@@ -47,16 +47,5 @@ export class LoginUseCase
       throw new ImATeapotException();
     }
     return this.generateTokenPair(this.jwtService, session);
-    // const session = new this.sessionModel({
-    //   userId: user._id,
-    //   title: command.agent,
-    //   ip: [command.ip],
-    // });
-    // const isSaved: boolean = await this.commandRepo.saveSession(session);
-    // if (!isSaved) {
-    //   throw new ImATeapotException();
-    // }
-    // return this.generateTokenPair(this.jwtService, session.getMetaForToken());
-    return;
   }
 }

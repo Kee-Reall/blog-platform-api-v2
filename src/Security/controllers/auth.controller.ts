@@ -12,9 +12,7 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-//import { command, query } from '../useCases';
 import { appConfig } from '../../Infrastructure';
-
 import {
   CodeInput,
   EmailInput,
@@ -33,7 +31,7 @@ import { JwtGuard, Meta } from '../../Base';
 import { FastifyReply } from 'fastify';
 import { CookieSerializeOptions } from '@fastify/cookie';
 import { RefreshJwtAuthGuard } from '../guard';
-import { command } from '../useCases';
+import { command, query } from '../useCases';
 
 @Controller('api/auth')
 export class AuthController {
@@ -62,14 +60,14 @@ export class AuthController {
     return { accessToken: tokenPair.accessToken };
   }
 
-  // @Get('me')
-  // @UseGuards(JwtGuard)
-  // @HttpCode(HttpStatus.OK)
-  // public async getInfoByToken(
-  //   @Meta() user: AccessTokenMeta,
-  // ): Promise<UserInfoType> {
-  //   return await this.queryBus.execute(new query.GetUserInfo(user.userId));
-  // }
+  @Get('me')
+  @UseGuards(JwtGuard)
+  @HttpCode(HttpStatus.OK)
+  public async getInfoByToken(
+    @Meta() user: AccessTokenMeta,
+  ): Promise<UserInfoType> {
+    return await this.queryBus.execute(new query.GetUserInfo(user.userId));
+  }
   //
   // @Post('refresh-token')
   // @UseGuards(RefreshJwtAuthGuard)

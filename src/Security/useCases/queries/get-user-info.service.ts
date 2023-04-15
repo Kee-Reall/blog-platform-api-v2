@@ -1,17 +1,30 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { AuthQueryRepository } from '../../repos';
 import { UserInfoType } from '../../../Model';
+import { DataSource } from 'typeorm';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { TablesENUM } from '../../../Helpres/SQL';
+import { NotFoundException } from '@nestjs/common';
 
 export class GetUserInfo {
-  constructor(public userId: string) {}
+  constructor(public userId: number) {}
 }
 
 @QueryHandler(GetUserInfo)
 export class GetUserInfoUseCase implements IQueryHandler<GetUserInfo> {
-  constructor(private repo: AuthQueryRepository) {}
+  constructor(@InjectDataSource() private ds: DataSource) {}
 
   public async execute(query: GetUserInfo): Promise<UserInfoType> {
-    //return this.repo.getUserInfo(query.userId);
-    return;
+    const result = await this.ds.query(
+      `SELECT email, login, id FROM ${TablesENUM.USERS} WHERE id = $1`,
+      [query.userId],
+    );
+    if (result.length < 1) {
+      throw new NotFoundException();
+    }
+    return {
+      userId: result[0].id,
+      login: result[0].login,
+      email: result[0].email,
+    };
   }
 }

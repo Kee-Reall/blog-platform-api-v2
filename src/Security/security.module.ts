@@ -7,6 +7,7 @@ import { useCases } from './useCases';
 import { AuthCommandRepository, AuthQueryRepository } from './repos';
 import { JwtModule } from '@nestjs/jwt';
 import { EmailService } from './email';
+import { HardJwtAuthStrategy } from '../Base';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { EmailService } from './email';
     EmailService,
     AuthQueryRepository,
     AuthCommandRepository,
+    HardJwtAuthStrategy,
     ...useCases,
   ],
 })
