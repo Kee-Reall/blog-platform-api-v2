@@ -1,7 +1,7 @@
-CREATE TABLE public."AdminBans"
+CREATE TABLE public."AdminUsersBans"
 (
     "userId" integer NOT NULL,
-    reason character varying[] DEFAULT null,
+    reason character varying DEFAULT null,
     date date,
     status boolean NOT NULL DEFAULT false,
     UNIQUE ("userId"),

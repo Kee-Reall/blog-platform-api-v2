@@ -1,6 +1,8 @@
-import { DataSource, EntityManager } from 'typeorm';
 import { Injectable } from '@nestjs/common';
+import { DataSource, EntityManager, QueryRunner } from 'typeorm';
 import { InjectDataSource, InjectEntityManager } from '@nestjs/typeorm';
+import { CreationContract } from '../../Base';
+import { TablesENUM } from '../../Helpres/SQL';
 import { UserCreationModel } from '../../Model';
 
 @Injectable()
@@ -10,32 +12,39 @@ export class AdminCommandRepository {
     @InjectDataSource() private ds: DataSource,
   ) {}
 
-  public async createUser(command: UserCreationModel): Promise<boolean> {
+  public async createUser(dto: UserCreationModel): Promise<CreationContract> {
+    const qr: QueryRunner = this.ds.createQueryRunner();
+    const contract = new CreationContract();
+    await qr.connect();
+    await qr.startTransaction();
     try {
-      const result = await this.ds.query(
+      const result = await qr.query(
         `
-    INSERT INTO public."Users"(login, email, hash)
-    VALUES ($1, $2, $3)
-    RETURNING id
+INSERT INTO ${TablesENUM.USERS}(login, email, hash)
+VALUES ($1, $2, $3)
+RETURNING id
     `,
-        [command.login, command.email, command.hash],
+        [dto.login, dto.email, dto.hash],
       );
       const id: number = result[0].id;
       const [confirmSting, banString, recoveryString] = [
-        `INSERT INTO public."Confirmation"("userId",status,date) VALUES ($1, true, NOW())`,
-        `INSERT INTO public."AdminUsersBans"("userId", status) VALUES ($1, false)`,
-        `INSERT INTO public."UsersRecovery"("userId") VALUES ($1)`,
+        `INSERT INTO ${TablesENUM.CONFIRMATIONS}("userId",status,date) VALUES ($1, true, NOW())`,
+        `INSERT INTO ${TablesENUM.USERS_BAN_LIST_BY_ADMIN}("userId", status) VALUES ($1, false)`,
+        `INSERT INTO ${TablesENUM.RECOVERIES_INFO}("userId") VALUES ($1)`,
       ];
-
       await Promise.all([
-        this.ds.query(confirmSting, [id]),
-        this.ds.query(banString, [id]),
-        this.ds.query(recoveryString, [id]),
+        qr.query(confirmSting, [id]),
+        qr.query(banString, [id]),
+        qr.query(recoveryString, [id]),
       ]);
-      return true;
+      await qr.commitTransaction();
+      contract.setId(id);
     } catch (e) {
-      console.log(e);
-      return false;
+      contract.setFailed();
+      await qr.rollbackTransaction();
+    } finally {
+      await qr.release();
+      return contract;
     }
   }
 }

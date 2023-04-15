@@ -7,9 +7,12 @@ import {
   ErrorMessage,
   UserInputModel,
   UserCreationModel,
+  WithBanInfo,
+  UserPresentationModel,
 } from '../../../Model';
 import { AdminCommandRepository } from '../../repos/admin-command.repository';
 import { hash as genHash, genSalt } from 'bcrypt';
+import { CreationContract } from "../../../Base/classes/contracts/creation.contract";
 
 export class CreateUser implements UserInputModel {
   email: string;
@@ -23,15 +26,15 @@ export class CreateUser implements UserInputModel {
   }
 }
 
-export type AdminPresentation = any;
-
 @CommandHandler(CreateUser)
 export class CreateUserUseCase implements ICommandHandler<CreateUser> {
   constructor(
     private queryRepo: AdminQueryRepository,
     private commandRepo: AdminCommandRepository,
   ) {}
-  public async execute(command: CreateUser): Promise<AdminPresentation> {
+  public async execute(
+    command: CreateUser,
+  ): Promise<WithBanInfo<UserPresentationModel>> {
     const errors = await this.queryRepo.checkUniqueUser(
       command.login,
       command.email,
@@ -44,10 +47,12 @@ export class CreateUserUseCase implements ICommandHandler<CreateUser> {
       email: command.email,
       hash: await genHash(command.password, await genSalt(8)),
     };
-    const isSaved: boolean = await this.commandRepo.createUser(dto);
-    if (!isSaved) {
+    const contract: CreationContract = await this.commandRepo.createUser(dto);
+    console.log(contract);
+    if (contract.isFailed()) {
       throw new ImATeapotException();
     }
+    return await this.queryRepo.getUser(contract.getId());
   }
 
   private generateNotUniqueError(rows: DbRowMessage[]): {
