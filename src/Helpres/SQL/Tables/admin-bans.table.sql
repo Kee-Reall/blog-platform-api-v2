@@ -2,7 +2,7 @@ CREATE TABLE public."AdminUsersBans"
 (
     "userId" integer NOT NULL,
     reason character varying DEFAULT null,
-    date date,
+    date timestamp without time zone,
     status boolean NOT NULL DEFAULT false,
     UNIQUE ("userId"),
     FOREIGN KEY ("userId")

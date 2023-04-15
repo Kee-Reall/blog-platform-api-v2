@@ -4,7 +4,7 @@ CREATE TABLE public."Users"
     login character varying NOT NULL,
     email character varying NOT NULL,
     hash character varying NOT NULL,
-    "createdAt" date NOT NULL DEFAULT NOW(),
+    "createdAt" timestamp without time zone NOT NULL DEFAULT NOW(),
     "isDeleted" boolean NOT NULL DEFAULT False,
     CONSTRAINT "userId" PRIMARY KEY (id),
     CONSTRAINT login UNIQUE (login),

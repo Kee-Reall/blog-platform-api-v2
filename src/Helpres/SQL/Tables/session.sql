@@ -2,7 +2,7 @@ CREATE TABLE public."Sessions"
 (
     "userId" integer NOT NULL,
     "deviceId" serial NOT NULL,
-    "updateDate" date NOT NULL DEFAULT NOW(),
+    "updateDate" timestamp without time zone NOT NULL DEFAULT NOW(),
     "lastIP" character varying DEFAULT NULL,
     title character varying,
     UNIQUE ("deviceId"),

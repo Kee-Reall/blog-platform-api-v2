@@ -1,7 +1,7 @@
 CREATE TABLE public."UsersRecovery"
 (
     "userId" integer NOT NULL,
-    expiration date DEFAULT NULL,
+    expiration timestamp without time zone DEFAULT NULL,
     code character varying DEFAULT NULL,
     UNIQUE ("userId"),
     FOREIGN KEY ("userId")

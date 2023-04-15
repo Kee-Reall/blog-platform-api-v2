@@ -1,7 +1,7 @@
 CREATE TABLE public."Confirmation"
 (
     "userId" integer NOT NULL,
-    date date,
+    date timestamp without time zone,
     code character varying,
     status boolean NOT NULL,
     UNIQUE ("userId"),
