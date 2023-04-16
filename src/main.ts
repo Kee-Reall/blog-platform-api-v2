@@ -17,6 +17,7 @@ async function bootstrap() {
   await app.register(cookie, { secret: appConfig.cookieSecret });
   app.useGlobalPipes(new ValidationPipe(appConfig.globalValidatorOptions));
   app.useGlobalFilters(new GlobalHTTPFilter());
+  app.setGlobalPrefix('api');
   const port = appConfig.port;
   await app.listen(port, () =>
     console.log('Api is listening :' + port + ' port'),

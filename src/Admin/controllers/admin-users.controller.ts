@@ -18,7 +18,7 @@ import { adminCommand, adminQuery } from '../useCases';
 import { UsersForAdminFilter } from '../../Model';
 import { BasicAuthGuard } from '../guards';
 
-@Controller('api/sa/users')
+@Controller('sa/users')
 @UseGuards(BasicAuthGuard)
 export class AdminUsersController {
   constructor(private commandBus: CommandBus, private queryBus: QueryBus) {}

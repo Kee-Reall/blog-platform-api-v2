@@ -33,7 +33,7 @@ import { CookieSerializeOptions } from '@fastify/cookie';
 import { RefreshJwtAuthGuard } from '../guard';
 import { command, query } from '../useCases';
 
-@Controller('api/auth')
+@Controller('auth')
 export class AuthController {
   private readonly cookiesOptions: CookieSerializeOptions =
     appConfig.cookiesOptions;
