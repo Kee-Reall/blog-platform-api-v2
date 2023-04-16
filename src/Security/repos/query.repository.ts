@@ -13,7 +13,7 @@ export class AuthQueryRepository {
     try {
       const result = await this.ds.query(
         `
-SELECT u.id, u.hash, c.status AS confirmed, ab.status AS banned
+SELECT u.id, u.hash, c.status AS confirmed, ab.status AS banned, u."isDeleted"
 FROM ${TablesENUM.USERS} AS u
 LEFT JOIN ${TablesENUM.CONFIRMATIONS} AS c 
 ON u.id = c."userId"
@@ -32,6 +32,7 @@ WHERE u.login = $1 OR u.email = $1
         hash: rawUser.hash,
         isConfirmed: rawUser.confirmed,
         isBanned: rawUser.banned,
+        isDeleted: rawUser.isDeleted,
       };
     } catch (e) {
       return null;

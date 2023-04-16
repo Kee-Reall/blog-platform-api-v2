@@ -31,7 +31,12 @@ export class LoginUseCase
     const user = await this.queryRepo.getUserByLoginOrEmail(
       command.loginOrEmail,
     );
-    if (!user || !user.isConfirmed || user.isBanned) {
+    if (!user) {
+      throw new UnauthorizedException();
+    }
+    const cantLogin: boolean =
+      !user.isConfirmed || user.isBanned || user.isDeleted;
+    if (cantLogin) {
       throw new UnauthorizedException();
     }
     const isPasswordValid = await compare(command.password, user.hash);

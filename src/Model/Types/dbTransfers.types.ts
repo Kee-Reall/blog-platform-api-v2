@@ -13,4 +13,5 @@ export type UserForLogin = {
   hash: string;
   isBanned: boolean;
   isConfirmed: boolean;
+  isDeleted: boolean;
 };
