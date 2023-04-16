@@ -1,14 +1,34 @@
-import { Controller, Get, Req, Res } from '@nestjs/common';
-import { FastifyRequest, FastifyReply } from 'fastify';
+import {
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Req,
+  Res,
+} from '@nestjs/common';
+import { FastifyRequest } from 'fastify';
+import { DataSource } from 'typeorm';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { TablesENUM } from '../Helpres/SQL';
 
-@Controller('api/testing')
+@Controller('testing')
 export class TestingController {
+  constructor(@InjectDataSource() private ds: DataSource) {}
+  @Delete('all-data')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  public async clearDb() {
+    await Promise.allSettled([
+      this.ds.query(`DELETE FROM ${TablesENUM.USERS}`),
+      this.ds.query(`DELETE FROM ${TablesENUM.USERS_BAN_LIST_BY_ADMIN}`),
+      this.ds.query(`DELETE FROM ${TablesENUM.CONFIRMATIONS}`),
+      this.ds.query(`DELETE FROM ${TablesENUM.RECOVERIES_INFO}`),
+      this.ds.query(`DELETE FROM ${TablesENUM.SESSIONS}`),
+    ]);
+    return;
+  }
   @Get('always-ok')
-  public async alwaysOk(
-    @Req() req: FastifyRequest,
-    @Res({ passthrough: true }) reply: FastifyReply,
-  ) {
-    console.log(reply);
+  public async alwaysOk(@Req() req: FastifyRequest) {
     const {
       headers,
       hostname,
