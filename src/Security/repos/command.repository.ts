@@ -59,4 +59,16 @@ RETURNING *
       return null;
     }
   }
+
+  public async killSessions(meta: SessionJwtMeta): Promise<boolean> {
+    try {
+      const [_, deleted] = await this.ds.query(
+        `DELETE FROM ${TablesENUM.SESSIONS} WHERE "deviceId" = $1 AND "userId" = $2`,
+        [meta.deviceId, meta.userId],
+      );
+      return deleted === 1;
+    } catch (e) {
+      return false;
+    }
+  }
 }

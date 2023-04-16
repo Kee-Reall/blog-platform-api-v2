@@ -87,18 +87,18 @@ export class AuthController {
     );
     return { accessToken: tokenPair.accessToken };
   }
-  //
-  // @Post('logout')
-  // @UseGuards(RefreshJwtAuthGuard)
-  // @HttpCode(HttpStatus.NO_CONTENT)
-  // public async logout(
-  //   @Res({ passthrough: true }) reply: FastifyReply,
-  //   @Meta() userMeta: SessionJwtMeta,
-  // ): VoidPromise {
-  //   await this.commandBus.execute(new command.Logout(userMeta));
-  //   reply.clearCookie('refreshToken');
-  //   return;
-  // }
+
+  @Post('logout')
+  @UseGuards(RefreshJwtAuthGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  public async logout(
+    @Res({ passthrough: true }) reply: FastifyReply,
+    @Meta() userMeta: SessionJwtMeta,
+  ): VoidPromise {
+    await this.commandBus.execute(new command.Logout(userMeta));
+    reply.clearCookie('refreshToken');
+    return;
+  }
   //
   // @Post('registration')
   // @UseGuards(ThrottlerGuard)

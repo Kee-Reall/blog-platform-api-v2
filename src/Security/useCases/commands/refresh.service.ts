@@ -46,7 +46,6 @@ export class RefreshUseCase
       command.meta.deviceId,
       command.ip,
     );
-    console.log(newMeta);
     if (!newMeta) {
       throw new ImATeapotException();
     }

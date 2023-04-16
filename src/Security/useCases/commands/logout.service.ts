@@ -1,8 +1,13 @@
-import { UnauthorizedException } from '@nestjs/common';
+import { ImATeapotException, UnauthorizedException } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { SecurityService } from '../base';
-import { AuthQueryRepository } from '../../repos';
-import { SessionJwtMeta, VoidPromise } from '../../../Model';
+import { AuthCommandRepository, AuthQueryRepository } from '../../repos';
+import {
+  Nullable,
+  SessionJwtMeta,
+  SessionsFromDb,
+  VoidPromise,
+} from '../../../Model';
 
 export class Logout implements SessionJwtMeta {
   deviceId: number;
@@ -21,19 +26,28 @@ export class LogoutUseCase
   extends SecurityService
   implements ICommandHandler<Logout>
 {
-  constructor(private repo: AuthQueryRepository) {
+  constructor(
+    private commandRepo: AuthCommandRepository,
+    private queryRepo: AuthQueryRepository,
+  ) {
     super();
   }
 
   public async execute(command: Logout): VoidPromise {
-    // const session = await this.repo.findSession(command.deviceId);
-    // if (!session) {
-    //   throw new UnauthorizedException();
-    // }
-    // if (!this.checkValidMeta(command, session)) {
-    //   throw new UnauthorizedException();
-    // }
-    // return await session.killYourself();
+    const session: Nullable<SessionsFromDb> = await this.queryRepo.getSession(
+      command.deviceId,
+    );
+    if (!session) {
+      throw new UnauthorizedException();
+    }
+    const notValidMeta = !this.checkValidMeta(command, session);
+    if (notValidMeta) {
+      throw new UnauthorizedException();
+    }
+    const isDeleted = await this.commandRepo.killSessions(command);
+    if (!isDeleted) {
+      throw new ImATeapotException();
+    }
     return;
   }
 }
