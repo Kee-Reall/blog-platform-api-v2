@@ -10,7 +10,7 @@ export interface SessionMetadata {
 
 export interface SessionJwtMeta {
   userId: number;
-  deviceId: string;
+  deviceId: number;
   updateDate: string;
 }
 

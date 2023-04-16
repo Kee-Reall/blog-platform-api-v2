@@ -1,4 +1,5 @@
 import { Nullable } from './helpers.types';
+import { SessionJwtMeta } from './auth.metadata.types';
 
 export type DbRowMessage = { field: string };
 export interface OperationResult<Payload = any> {
@@ -15,3 +16,5 @@ export type UserForLogin = {
   isConfirmed: boolean;
   isDeleted: boolean;
 };
+
+export type SessionsFromDb = Pick<SessionJwtMeta, 'userId' | 'updateDate'>;
