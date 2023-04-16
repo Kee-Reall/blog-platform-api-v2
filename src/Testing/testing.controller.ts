@@ -5,7 +5,6 @@ import {
   HttpCode,
   HttpStatus,
   Req,
-  Res,
 } from '@nestjs/common';
 import { FastifyRequest } from 'fastify';
 import { DataSource } from 'typeorm';
@@ -18,13 +17,14 @@ export class TestingController {
   @Delete('all-data')
   @HttpCode(HttpStatus.NO_CONTENT)
   public async clearDb() {
-    await Promise.allSettled([
+    const res = await Promise.allSettled([
       this.ds.query(`DELETE FROM ${TablesENUM.USERS}`),
       this.ds.query(`DELETE FROM ${TablesENUM.USERS_BAN_LIST_BY_ADMIN}`),
       this.ds.query(`DELETE FROM ${TablesENUM.CONFIRMATIONS}`),
       this.ds.query(`DELETE FROM ${TablesENUM.RECOVERIES_INFO}`),
       this.ds.query(`DELETE FROM ${TablesENUM.SESSIONS}`),
     ]);
+    console.log(res);
     return;
   }
   @Get('always-ok')

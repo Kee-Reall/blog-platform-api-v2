@@ -1,7 +1,7 @@
 import { JwtService } from '@nestjs/jwt';
 import { MessageENUM } from '../../../Base';
 import { appConfig } from '../../../Infrastructure';
-import { SessionJwtMeta, TokenPair } from '../../../Model';
+import { SessionJwtMeta, SessionsFromDb, TokenPair } from '../../../Model';
 
 export abstract class SecurityService {
   protected generateTokenPair(
@@ -28,10 +28,10 @@ export abstract class SecurityService {
 
   protected checkValidMeta(
     meta: SessionJwtMeta,
-    session: any /*SessionDocument*/,
+    session: SessionsFromDb,
   ): boolean {
-    const isSameUser = session.userId.toHexString() === meta.userId;
-    const isSameDate = meta.updateDate === session.updateDate.toISOString();
+    const isSameUser = session.userId === meta.userId;
+    const isSameDate = meta.updateDate === session.updateDate;
     return isSameUser && isSameDate;
   }
 

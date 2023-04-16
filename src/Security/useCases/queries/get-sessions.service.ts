@@ -5,7 +5,7 @@ import { AuthQueryRepository } from '../../repos';
 import { NullablePromise, SessionJwtMeta } from '../../../Model';
 
 export class GetSessions implements SessionJwtMeta {
-  deviceId: string;
+  deviceId: number;
   updateDate: string;
   userId: number;
   constructor(dto: SessionJwtMeta) {

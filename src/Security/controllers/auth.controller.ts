@@ -68,25 +68,25 @@ export class AuthController {
   ): Promise<UserInfoType> {
     return await this.queryBus.execute(new query.GetUserInfo(user.userId));
   }
-  //
-  // @Post('refresh-token')
-  // @UseGuards(RefreshJwtAuthGuard)
-  // @HttpCode(HttpStatus.OK)
-  // public async refreshSession(
-  //   @Res({ passthrough: true }) reply: FastifyReply,
-  //   @Meta() userMeta: SessionJwtMeta,
-  //   @Ip() ip,
-  // ): Promise<Pick<TokenPair, 'accessToken'>> {
-  //   const tokenPair: TokenPair = await this.commandBus.execute(
-  //     new command.Refresh(userMeta, ip),
-  //   );
-  //   reply.setCookie(
-  //     'refreshToken',
-  //     tokenPair.refreshToken,
-  //     this.cookiesOptions,
-  //   );
-  //   return { accessToken: tokenPair.accessToken };
-  // }
+
+  @Post('refresh-token')
+  @UseGuards(RefreshJwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  public async refreshSession(
+    @Res({ passthrough: true }) reply: FastifyReply,
+    @Meta() userMeta: SessionJwtMeta,
+    @Ip() ip,
+  ): Promise<Pick<TokenPair, 'accessToken'>> {
+    const tokenPair: TokenPair = await this.commandBus.execute(
+      new command.Refresh(userMeta, ip),
+    );
+    reply.setCookie(
+      'refreshToken',
+      tokenPair.refreshToken,
+      this.cookiesOptions,
+    );
+    return { accessToken: tokenPair.accessToken };
+  }
   //
   // @Post('logout')
   // @UseGuards(RefreshJwtAuthGuard)

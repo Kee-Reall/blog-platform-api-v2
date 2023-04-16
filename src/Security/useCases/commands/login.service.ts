@@ -43,14 +43,14 @@ export class LoginUseCase
     if (!isPasswordValid) {
       throw new UnauthorizedException();
     }
-    const session = await this.commandRepo.createSession(
+    const meta = await this.commandRepo.createSession(
       user.id,
       command.agent,
       command.ip,
     );
-    if (!session) {
+    if (!meta) {
       throw new ImATeapotException();
     }
-    return this.generateTokenPair(this.jwtService, session);
+    return this.generateTokenPair(this.jwtService, meta);
   }
 }

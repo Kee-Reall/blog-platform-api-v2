@@ -5,7 +5,7 @@ import { AuthQueryRepository } from '../../repos';
 import { SessionJwtMeta, VoidPromise } from '../../../Model';
 
 export class Logout implements SessionJwtMeta {
-  deviceId: string;
+  deviceId: number;
 
   updateDate: string;
   userId: number;

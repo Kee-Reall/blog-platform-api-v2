@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { TablesENUM } from '../../Helpres/SQL';
-import { NullablePromise, UserForLogin } from '../../Model';
+import { NullablePromise, SessionsFromDb, UserForLogin } from '../../Model';
 
 @Injectable()
 export class AuthQueryRepository {
@@ -33,6 +33,30 @@ WHERE u.login = $1 OR u.email = $1
         isConfirmed: rawUser.confirmed,
         isBanned: rawUser.banned,
         isDeleted: rawUser.isDeleted,
+      };
+    } catch (e) {
+      return null;
+    }
+  }
+
+  public async getSession(deviceId: number): NullablePromise<SessionsFromDb> {
+    try {
+      const result = await this.ds.query(
+        `
+SELECT s."userId", s."updateDate" FROM ${TablesENUM.SESSIONS} AS s
+JOIN ${TablesENUM.USERS} AS u ON u.id = s."userId"
+JOIN ${TablesENUM.USERS_BAN_LIST_BY_ADMIN} AS ab ON u.id = ab."userId"
+WHERE s."deviceId" = $1 AND u."isDeleted" = false AND ab.status = false
+      `,
+        [deviceId],
+      );
+      if (result.length < 1) {
+        return null;
+      }
+      const session = result[0];
+      return {
+        updateDate: session.updateDate.toISOString(),
+        userId: session.userId,
       };
     } catch (e) {
       return null;

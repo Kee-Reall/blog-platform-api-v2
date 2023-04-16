@@ -1,13 +1,14 @@
+import { JwtModule } from '@nestjs/jwt';
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
-import { AuthController } from './controllers/auth.controller';
 import { ThrottlerModule } from '@nestjs/throttler';
-import { appConfig } from '../Infrastructure';
 import { useCases } from './useCases';
-import { AuthCommandRepository, AuthQueryRepository } from './repos';
-import { JwtModule } from '@nestjs/jwt';
 import { EmailService } from './email';
 import { HardJwtAuthStrategy } from '../Base';
+import { appConfig } from '../Infrastructure';
+import { AuthController } from './controllers';
+import { RefreshJwtAuthStrategy } from './strategy';
+import { AuthCommandRepository, AuthQueryRepository } from './repos';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { HardJwtAuthStrategy } from '../Base';
     AuthQueryRepository,
     AuthCommandRepository,
     HardJwtAuthStrategy,
+    RefreshJwtAuthStrategy,
     ...useCases,
   ],
 })

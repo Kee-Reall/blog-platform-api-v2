@@ -4,7 +4,7 @@ import { SecurityService } from '../base';
 import { AuthCommandRepository, AuthQueryRepository } from '../../repos';
 
 export class KillAllSessionsExcludeCurrent implements SessionJwtMeta {
-  deviceId: string;
+  deviceId: number;
   updateDate: string;
   userId: number;
   constructor(dto: SessionJwtMeta) {

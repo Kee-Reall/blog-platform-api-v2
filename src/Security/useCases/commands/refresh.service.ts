@@ -2,7 +2,12 @@ import { JwtService } from '@nestjs/jwt';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { ImATeapotException, UnauthorizedException } from '@nestjs/common';
 import { SecurityService } from '../base';
-import { Nullable, SessionJwtMeta, TokenPair } from '../../../Model';
+import {
+  Nullable,
+  SessionJwtMeta,
+  SessionsFromDb,
+  TokenPair,
+} from '../../../Model';
 import { AuthCommandRepository, AuthQueryRepository } from '../../repos';
 
 export class Refresh {
@@ -27,22 +32,25 @@ export class RefreshUseCase
     super();
   }
   public async execute(command: Refresh): Promise<TokenPair> {
-    // const session = await this.queryRepo.findSession(command.meta.deviceId);
-    // if (!session) {
-    //   throw new UnauthorizedException();
-    // }
-    // if (!this.checkValidMeta(command.meta, session)) {
-    //   throw new UnauthorizedException();
-    // }
-    // session.setNewUpdateDate();
-    // if (command.ip) {
-    //   session.setLastIp(command.ip);
-    // }
-    // const isSaved: boolean = await this.commandRepo.saveSession(session);
-    // if (!isSaved) {
-    //   throw new ImATeapotException();
-    // }
-    //return this.generateTokenPair(this.jwtService, session.getMetaForToken());
+    const session: Nullable<SessionsFromDb> = await this.queryRepo.getSession(
+      command.meta.deviceId,
+    );
+    if (!session) {
+      throw new UnauthorizedException();
+    }
+    const notValidMeta = !this.checkValidMeta(command.meta, session);
+    if (notValidMeta) {
+      throw new UnauthorizedException();
+    }
+    const newMeta: SessionJwtMeta = await this.commandRepo.updateSession(
+      command.meta.deviceId,
+      command.ip,
+    );
+    console.log(newMeta);
+    if (!newMeta) {
+      throw new ImATeapotException();
+    }
+    return this.generateTokenPair(this.jwtService, newMeta);
     return;
   }
 }
