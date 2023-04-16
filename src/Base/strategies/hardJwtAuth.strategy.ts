@@ -5,7 +5,7 @@ import { appConfig } from '../../Infrastructure';
 import { AccessTokenPayload, UserAccessDTO } from '../../Model';
 import { DataSource } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { TablesENUM } from '../../Helpres/SQL';
+import { TablesENUM } from '../../Helpers/SQL';
 
 @Injectable()
 export class HardJwtAuthStrategy extends PassportStrategy(Strategy) {

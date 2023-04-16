@@ -1,5 +1,5 @@
 export class CreationContract {
-  private payload: { id: number };
+  private payload: { id: number; code?: string };
   private status: boolean;
 
   constructor() {
@@ -33,5 +33,13 @@ export class CreationContract {
 
   public isFailed(): boolean {
     return this.status === false;
+  }
+
+  public setCode(code: string) {
+    this.payload.code = code;
+  }
+
+  public getCode(): string {
+    return this.payload.code;
   }
 }

@@ -1,7 +1,8 @@
-import { BadRequestException, ImATeapotException } from '@nestjs/common';
+import { hash as genHash, genSalt } from 'bcrypt';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { MessageENUM } from '../../../Base';
-import { AdminQueryRepository } from '../../repos/admin-query.repository';
+import { BadRequestException, ImATeapotException } from '@nestjs/common';
+import { MessageENUM, CreationContract } from '../../../Base';
+import { AdminCommandRepository, AdminQueryRepository } from '../../repos';
 import {
   DbRowMessage,
   ErrorMessage,
@@ -10,9 +11,6 @@ import {
   WithBanInfo,
   UserPresentationModel,
 } from '../../../Model';
-import { AdminCommandRepository } from '../../repos/admin-command.repository';
-import { hash as genHash, genSalt } from 'bcrypt';
-import { CreationContract } from "../../../Base/classes/contracts/creation.contract";
 
 export class CreateUser implements UserInputModel {
   email: string;
@@ -48,7 +46,6 @@ export class CreateUserUseCase implements ICommandHandler<CreateUser> {
       hash: await genHash(command.password, await genSalt(8)),
     };
     const contract: CreationContract = await this.commandRepo.createUser(dto);
-    console.log(contract);
     if (contract.isFailed()) {
       throw new ImATeapotException();
     }

@@ -9,7 +9,7 @@ import {
 import { FastifyRequest } from 'fastify';
 import { DataSource } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { TablesENUM } from '../Helpres/SQL';
+import { TablesENUM } from '../Helpers/SQL';
 
 @Controller('testing')
 export class TestingController {

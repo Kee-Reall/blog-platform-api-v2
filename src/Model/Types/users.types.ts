@@ -94,4 +94,6 @@ export type UserForBloggerPresentation = {
 
 export type UserCreationModel = Omit<UserInputModel, 'password'> & {
   hash: string;
+  code?: string;
+  date?: Date;
 };

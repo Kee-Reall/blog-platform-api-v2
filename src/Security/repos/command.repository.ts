@@ -1,8 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
-import { TablesENUM } from '../../Helpres/SQL';
-import { Nullable, NullablePromise, SessionJwtMeta } from '../../Model';
+import { DataSource, QueryRunner } from 'typeorm';
+import { TablesENUM } from '../../Helpers/SQL';
+import {
+  Nullable,
+  NullablePromise,
+  SessionJwtMeta,
+  UserCreationModel,
+  VoidPromise,
+} from '../../Model';
+import { CreationContract } from '../../Base';
+import { command } from '../useCases';
 
 @Injectable()
 export class AuthCommandRepository {
@@ -69,6 +77,53 @@ RETURNING *
       return deleted === 1;
     } catch (e) {
       return false;
+    }
+  }
+
+  public async createUser(
+    dto: Required<UserCreationModel>,
+  ): Promise<CreationContract> {
+    const queryRunner: QueryRunner = this.ds.createQueryRunner();
+    const contract = new CreationContract();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      const result = await queryRunner.query(
+        `
+INSERT INTO ${TablesENUM.USERS}(login, email, hash)
+VALUES ($1, $2, $3)
+RETURNING id
+    `,
+        [dto.login, dto.email, dto.hash],
+      );
+      const id: number = result[0].id;
+      const [confirm, ban, recovery] = [
+        `INSERT INTO ${TablesENUM.CONFIRMATIONS}("userId",status,date,code) VALUES ($1, false, $2,$3)`,
+        `INSERT INTO ${TablesENUM.USERS_BAN_LIST_BY_ADMIN}("userId", status) VALUES ($1, false)`,
+        `INSERT INTO ${TablesENUM.RECOVERIES_INFO}("userId") VALUES ($1)`,
+      ];
+      await Promise.all([
+        queryRunner.query(confirm, [id, dto.date, dto.code]),
+        queryRunner.query(ban, [id]),
+        queryRunner.query(recovery, [id]),
+      ]);
+      await queryRunner.commitTransaction();
+      contract.setId(id);
+      contract.setCode(dto.code);
+    } catch (e) {
+      contract.setFailed();
+      await queryRunner.rollbackTransaction();
+    } finally {
+      await queryRunner.release();
+      return contract;
+    }
+  }
+
+  public async killUser(id: number): VoidPromise {
+    try {
+      await this.ds.query(`DELETE FROM ${TablesENUM.USERS} WHERE id=$1`, [id]);
+    } finally {
+      return;
     }
   }
 }

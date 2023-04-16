@@ -7,24 +7,28 @@ import {
   UserPresentationModel,
   WithBanInfo,
 } from '../../Model';
-import { TablesENUM } from '../../Helpres/SQL';
+import { TablesENUM } from '../../Helpers/SQL';
+import { AbstractRepository } from '../../Base/classes/abstracts/repository.class';
 
 @Injectable()
-export class AdminQueryRepository {
-  constructor(@InjectDataSource() private ds: DataSource) {}
+export class AdminQueryRepository extends AbstractRepository {
+  constructor(@InjectDataSource() private ds: DataSource) {
+    super();
+  }
 
   public async checkUniqueUser(
     login: string,
     email: string,
   ): Promise<DbRowMessage[]> {
-    return this.ds.query(
-      `
-SELECT 'login' AS field FROM ${TablesENUM.USERS} WHERE login = $1 
-UNION 
-SELECT 'email' AS field FROM ${TablesENUM.USERS} WHERE email = $2;
-    `,
-      [login, email],
-    );
+    return await this.getUniqueUserError(this.ds, login, email);
+    //return this.ds.query(
+    // `
+    // SELECT 'login' AS field FROM ${TablesENUM.USERS} WHERE login = $1
+    // UNION
+    // SELECT 'email' AS field FROM ${TablesENUM.USERS} WHERE email = $2;
+    //     `,
+    //       [login, email],
+    //     );
   }
 
   public async getUser(

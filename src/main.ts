@@ -8,6 +8,7 @@ import cookie from '@fastify/cookie';
 import { ValidationPipe } from '@nestjs/common';
 import { appConfig } from './Infrastructure';
 import { GlobalHTTPFilter } from './Base';
+import { callback } from './Helpers/';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
@@ -19,9 +20,7 @@ async function bootstrap() {
   app.useGlobalFilters(new GlobalHTTPFilter());
   app.setGlobalPrefix('api');
   const port = appConfig.port;
-  await app.listen(port, () =>
-    console.log('Api is listening :' + port + ' port'),
-  );
+  await app.listen(port, callback(port));
 }
 
 bootstrap();

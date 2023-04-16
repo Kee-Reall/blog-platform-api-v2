@@ -99,14 +99,14 @@ export class AuthController {
     reply.clearCookie('refreshToken');
     return;
   }
-  //
-  // @Post('registration')
-  // @UseGuards(ThrottlerGuard)
-  // @HttpCode(HttpStatus.NO_CONTENT)
-  // public async registration(@Body() dto: UserInput): VoidPromise {
-  //   return await this.commandBus.execute(new command.Register(dto));
-  // }
-  //
+
+  @Post('registration')
+  @UseGuards(ThrottlerGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  public async registration(@Body() dto: UserInput): VoidPromise {
+    return await this.commandBus.execute(new command.Register(dto));
+  }
+
   // @Post('registration-email-resending')
   // @UseGuards(ThrottlerGuard)
   // @HttpCode(HttpStatus.NO_CONTENT)

@@ -1,12 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { TablesENUM } from '../../Helpres/SQL';
+import { TablesENUM } from '../../Helpers/SQL';
 import { NullablePromise, SessionsFromDb, UserForLogin } from '../../Model';
+import { AbstractRepository } from '../../Base';
 
 @Injectable()
-export class AuthQueryRepository {
-  constructor(@InjectDataSource() private ds: DataSource) {}
+export class AuthQueryRepository extends AbstractRepository {
+  constructor(@InjectDataSource() private ds: DataSource) {
+    super();
+  }
   public async getUserByLoginOrEmail(
     loginOrEmail: string,
   ): NullablePromise<UserForLogin> {
@@ -61,5 +64,9 @@ WHERE s."deviceId" = $1 AND u."isDeleted" = false AND ab.status = false
     } catch (e) {
       return null;
     }
+  }
+
+  public async checkUniqueUser(login: string, email: string) {
+    return this.getUniqueUserError(this.ds, login, email);
   }
 }

@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { DataSource, QueryRunner } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { CreationContract } from '../../Base';
-import { TablesENUM } from '../../Helpres/SQL';
+import { TablesENUM } from '../../Helpers/SQL';
 import { UserCreationModel } from '../../Model';
 
 @Injectable()

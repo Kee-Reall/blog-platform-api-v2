@@ -2,7 +2,7 @@ import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { UserInfoType } from '../../../Model';
 import { DataSource } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { TablesENUM } from '../../../Helpres/SQL';
+import { TablesENUM } from '../../../Helpers/SQL';
 import { NotFoundException } from '@nestjs/common';
 
 export class GetUserInfo {
