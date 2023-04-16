@@ -26,6 +26,15 @@ export class ResendingConfirmationCodeUseCase
     super();
   }
   public async execute(command: ResendConfirmCode): VoidPromise {
+    const user = await this.queryRepo.getUserStatusByEmail(command.email);
+    if (!user) {
+      throw new BadRequestException(this.generateNotAllowMessage('email'));
+    }
+    for (const value of Object.values(user)) {
+      if (value) {
+        throw new BadRequestException(this.generateNotAllowMessage('email'));
+      }
+    }
     // const user = await this.queryRepo.getUserByEmail(command.email);
     // if (!user || user.confirmation.isConfirmed) {
     //   throw new BadRequestException(this.generateNotAllowMessage('email'));

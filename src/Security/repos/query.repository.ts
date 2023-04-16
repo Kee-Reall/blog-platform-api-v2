@@ -2,7 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { TablesENUM } from '../../Helpers/SQL';
-import { NullablePromise, SessionsFromDb, UserForLogin } from '../../Model';
+import {
+  NullablePromise,
+  SessionsFromDb,
+  UserForLogin,
+  UserStatus,
+} from '../../Model';
 import { AbstractRepository } from '../../Base';
 
 @Injectable()
@@ -68,5 +73,31 @@ WHERE s."deviceId" = $1 AND u."isDeleted" = false AND ab.status = false
 
   public async checkUniqueUser(login: string, email: string) {
     return this.getUniqueUserError(this.ds, login, email);
+  }
+
+  public async getUserStatusByEmail(
+    email: string,
+  ): NullablePromise<UserStatus> {
+    try {
+      const result = await this.ds.query(
+        `
+SELECT u."isDeleted", ab.status AS "isBanned",c.status AS "isConfirmed"
+FROM ${TablesENUM.USERS} AS u
+JOIN ${TablesENUM.CONFIRMATIONS} AS c
+ON u.id = c."userId"
+JOIN ${TablesENUM.USERS_BAN_LIST_BY_ADMIN} AS ab
+ON u.id = ab."userId"
+WHERE u.email = $1
+      `,
+        [email],
+      );
+      if (result.length < 1) {
+        return null;
+      }
+      const [userStatus] = result;
+      return userStatus;
+    } catch (e) {
+      return null;
+    }
   }
 }

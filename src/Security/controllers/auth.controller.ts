@@ -107,14 +107,14 @@ export class AuthController {
     return await this.commandBus.execute(new command.Register(dto));
   }
 
-  // @Post('registration-email-resending')
-  // @UseGuards(ThrottlerGuard)
-  // @HttpCode(HttpStatus.NO_CONTENT)
-  // public async resendConfirmCode(@Body() dto: EmailInput): VoidPromise {
-  //   return await this.commandBus.execute(
-  //     new command.ResendConfirmCode(dto.email),
-  //   );
-  // }
+  @Post('registration-email-resending')
+  @UseGuards(ThrottlerGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  public async resendConfirmCode(@Body() dto: EmailInput): VoidPromise {
+    return await this.commandBus.execute(
+      new command.ResendConfirmCode(dto.email),
+    );
+  }
   //
   // @Post('registration-confirmation')
   // @UseGuards(ThrottlerGuard)

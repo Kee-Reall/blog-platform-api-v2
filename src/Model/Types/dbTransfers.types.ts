@@ -18,3 +18,8 @@ export type UserForLogin = {
 };
 
 export type SessionsFromDb = Pick<SessionJwtMeta, 'userId' | 'updateDate'>;
+export interface UserStatus {
+  isDeleted: boolean;
+  isBanned: boolean;
+  isConfirmed: boolean;
+}
