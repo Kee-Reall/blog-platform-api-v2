@@ -115,13 +115,13 @@ export class AuthController {
       new command.ResendConfirmCode(dto.email),
     );
   }
-  //
-  // @Post('registration-confirmation')
-  // @UseGuards(ThrottlerGuard)
-  // @HttpCode(HttpStatus.NO_CONTENT)
-  // public async confirm(@Body() dto: CodeInput): VoidPromise {
-  //   return await this.commandBus.execute(new command.ConfirmAccount(dto.code));
-  // }
+
+  @Post('registration-confirmation')
+  @UseGuards(ThrottlerGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  public async confirm(@Body() dto: CodeInput): VoidPromise {
+    return await this.commandBus.execute(new command.ConfirmAccount(dto.code));
+  }
   //
   // @Post('password-recovery')
   // @UseGuards(ThrottlerGuard)

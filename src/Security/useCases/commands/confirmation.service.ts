@@ -1,3 +1,4 @@
+import { isAfter } from 'date-fns';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { BadRequestException, ImATeapotException } from '@nestjs/common';
 import { SecurityService } from '../base';
@@ -20,15 +21,22 @@ export class ConfirmationUseCase
     super();
   }
   public async execute(command: ConfirmAccount): VoidPromise {
-    // const user = await this.queryRepo.getUserByCode(command.code);
-    // if (!user || user.confirmation.isConfirmed) {
-    //   throw new BadRequestException(this.generateNotAllowMessage('code'));
-    // }
-    // user.confirm();
-    // const isSaved = await this.commandRepo.saveAfterChanges(user);
-    // if (!isSaved) {
-    //   throw new ImATeapotException();
-    // }
+    const result = await this.queryRepo.getUserStatusByCode(command.code);
+    if (!result) {
+      throw new BadRequestException(this.generateNotAllowMessage('code'));
+    }
+    const [status, confirmDate] = result;
+    const isStatusValid = this.checkStatus(status);
+    if (!isStatusValid) {
+      throw new BadRequestException(this.generateNotAllowMessage('code'));
+    }
+    if (isAfter(new Date(), confirmDate)) {
+      throw new BadRequestException(this.generateNotAllowMessage('code'));
+    }
+    const isSaved: boolean = await this.commandRepo.confirmUser(command.code);
+    if (!isSaved) {
+      throw new ImATeapotException();
+    }
     return;
   }
 }

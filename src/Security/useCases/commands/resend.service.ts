@@ -1,12 +1,13 @@
+import { addMinutes } from 'date-fns';
+import { v4 as genUUIDv4 } from 'uuid';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import {
   BadRequestException,
-  ImATeapotException,
   ServiceUnavailableException,
 } from '@nestjs/common';
+import { SecurityService } from '../base';
 import { EmailService } from '../../email';
 import { VoidPromise } from '../../../Model';
-import { SecurityService } from '../base';
 import { AuthCommandRepository, AuthQueryRepository } from '../../repos';
 
 export class ResendConfirmCode {
@@ -26,31 +27,23 @@ export class ResendingConfirmationCodeUseCase
     super();
   }
   public async execute(command: ResendConfirmCode): VoidPromise {
-    const user = await this.queryRepo.getUserStatusByEmail(command.email);
-    if (!user) {
+    const status = await this.queryRepo.getUserStatusByEmail(command.email);
+    const isStatusValid = this.checkStatus(status);
+    if (!isStatusValid) {
       throw new BadRequestException(this.generateNotAllowMessage('email'));
     }
-    for (const value of Object.values(user)) {
-      if (value) {
-        throw new BadRequestException(this.generateNotAllowMessage('email'));
-      }
+    const code = genUUIDv4();
+    const isMailSent = await this.mailServ.sendConfirmation(
+      command.email,
+      code,
+    );
+    if (!isMailSent) {
+      throw new ServiceUnavailableException();
     }
-    // const user = await this.queryRepo.getUserByEmail(command.email);
-    // if (!user || user.confirmation.isConfirmed) {
-    //   throw new BadRequestException(this.generateNotAllowMessage('email'));
-    // }
-    // user.updateConfirmCode();
-    // const isMailSent = await this.mailServ.sendConfirmation(
-    //   user.email,
-    //   user.confirmation.code,
-    // );
-    // if (!isMailSent) {
-    //   throw new ServiceUnavailableException();
-    // }
-    // const isSaved = await this.commandRepo.saveAfterChanges(user);
-    // if (!isSaved) {
-    //   throw new ImATeapotException();
-    // }
+    const newTime = addMinutes(new Date(), 15);
+    this.commandRepo
+      .updateConfirmationCode(command.email, code, newTime)
+      .catch((e) => console.error(e));
     return;
   }
 }

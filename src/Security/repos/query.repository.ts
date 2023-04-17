@@ -100,4 +100,38 @@ WHERE u.email = $1
       return null;
     }
   }
+
+  public async getUserStatusByCode(
+    code: string,
+  ): NullablePromise<[UserStatus, Date]> {
+    try {
+      const result = await this.ds.query(
+        `
+SELECT 
+c.date as "confirmDate", u."isDeleted", ab.status AS "isBanned",c.status AS "isConfirmed"
+FROM ${TablesENUM.USERS} AS u
+JOIN ${TablesENUM.CONFIRMATIONS} AS c
+ON u.id = c."userId"
+JOIN ${TablesENUM.USERS_BAN_LIST_BY_ADMIN} AS ab
+ON u.id = ab."userId"
+WHERE c.code = $1
+      `,
+        [code],
+      );
+      if (result.length < 1) {
+        return null;
+      }
+      const [userInfo] = result;
+      const userStatus: UserStatus = {
+        isBanned: userInfo.isBanned,
+        isConfirmed: userInfo.isConfirmed,
+        isDeleted: userInfo.isDeleted,
+      };
+      const confirmDate = userInfo.confirmDate;
+      return [userStatus, confirmDate];
+    } catch (e) {
+      console.log(e);
+      return null;
+    }
+  }
 }

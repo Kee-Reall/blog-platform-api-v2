@@ -44,7 +44,7 @@ export class LogoutUseCase
     if (notValidMeta) {
       throw new UnauthorizedException();
     }
-    const isDeleted = await this.commandRepo.killSessions(command);
+    const isDeleted = await this.commandRepo.killSession(command);
     if (!isDeleted) {
       throw new ImATeapotException();
     }

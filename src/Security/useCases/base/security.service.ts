@@ -1,7 +1,12 @@
 import { JwtService } from '@nestjs/jwt';
 import { MessageENUM } from '../../../Base';
 import { appConfig } from '../../../Infrastructure';
-import { SessionJwtMeta, SessionsFromDb, TokenPair } from '../../../Model';
+import {
+  SessionJwtMeta,
+  SessionsFromDb,
+  TokenPair,
+  UserStatus,
+} from '../../../Model';
 
 export abstract class SecurityService {
   protected generateTokenPair(
@@ -33,6 +38,18 @@ export abstract class SecurityService {
     const isSameUser = session.userId === meta.userId;
     const isSameDate = meta.updateDate === session.updateDate;
     return isSameUser && isSameDate;
+  }
+
+  protected checkStatus(status: UserStatus): boolean {
+    if (!status) {
+      return false;
+    }
+    for (const value of Object.values(status)) {
+      if (value) {
+        return false;
+      }
+    }
+    return true;
   }
 
   protected generateNotAllowMessage(field) {

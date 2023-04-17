@@ -10,7 +10,6 @@ import {
   VoidPromise,
 } from '../../Model';
 import { CreationContract } from '../../Base';
-import { command } from '../useCases';
 
 @Injectable()
 export class AuthCommandRepository {
@@ -45,7 +44,7 @@ RETURNING "deviceId","userId","updateDate"
     try {
       const result = await this.ds.query(
         `
-UPDATE public."Sessions"
+UPDATE ${TablesENUM.SESSIONS}
 SET "updateDate"=NOW(), "lastIP"=$2
 WHERE "deviceId" = $1
 RETURNING *
@@ -68,12 +67,14 @@ RETURNING *
     }
   }
 
-  public async killSessions(meta: SessionJwtMeta): Promise<boolean> {
+  public async killSession(meta: SessionJwtMeta): Promise<boolean> {
     try {
-      const [_, deleted] = await this.ds.query(
-        `DELETE FROM ${TablesENUM.SESSIONS} WHERE "deviceId" = $1 AND "userId" = $2`,
-        [meta.deviceId, meta.userId],
-      );
+      const deleted = (
+        (await this.ds.query(
+          `DELETE FROM ${TablesENUM.SESSIONS} WHERE "deviceId" = $1 AND "userId" = $2`,
+          [meta.deviceId, meta.userId],
+        )) as Array<unknown>
+      ).at(-1);
       return deleted === 1;
     } catch (e) {
       return false;
@@ -124,6 +125,46 @@ RETURNING id
       await this.ds.query(`DELETE FROM ${TablesENUM.USERS} WHERE id=$1`, [id]);
     } finally {
       return;
+    }
+  }
+
+  public async updateConfirmationCode(
+    email: string,
+    code: string,
+    newTime: Date,
+  ): VoidPromise {
+    const result: Array<unknown> = await this.ds.query(
+      `
+UPDATE ${TablesENUM.CONFIRMATIONS}
+SET code = $2, date = $3
+WHERE "userId" = (
+  SELECT id FROM ${TablesENUM.USERS}
+  WHERE email = $1
+)
+      `,
+      [email, code, newTime],
+    );
+    const updated = result.at(-1);
+    if (updated !== 1) {
+      throw new Error();
+    }
+    return;
+  }
+
+  public async confirmUser(code: string): Promise<boolean> {
+    try {
+      const result = await this.ds.query(
+        `
+UPDATE ${TablesENUM.CONFIRMATIONS}
+SET code = NULL, date = NOW(), status = true
+WHERE code = $1
+      `,
+        [code],
+      );
+      return result[1] === 1;
+    } catch (e) {
+      console.log(e);
+      return false;
     }
   }
 }

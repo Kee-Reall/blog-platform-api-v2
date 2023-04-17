@@ -39,7 +39,6 @@ export class RegistrationUseCase implements ICommandHandler<Register> {
   ) {}
 
   public async execute(command: Register): VoidPromise {
-    const { login, email, password } = command;
     const errors = await this.queryRepo.checkUniqueUser(
       command.login,
       command.email,
@@ -59,32 +58,13 @@ export class RegistrationUseCase implements ICommandHandler<Register> {
       throw new ImATeapotException();
     }
     const isSent = await this.mailServ.sendConfirmation(
-      email,
+      command.email,
       contract.getCode(),
     );
     if (!isSent) {
       await this.commandRepo.killUser(contract.getId());
       throw new ServiceUnavailableException();
     }
-    return;
-    // const user = new this.mdl({ login, email });
-    // const [isUnique, fieldsArray] = await user.isFieldsUnique();
-    // if (!isUnique) {
-    //   throw new BadRequestException(this.generateError(fieldsArray));
-    // }
-    // await user.setHash(password);
-    // const isSaved: boolean = await this.repo.saveUserAfterRegistry(user);
-    // if (!isSaved) {
-    //   throw new ImATeapotException();
-    // }
-    // const isMailSent = await this.mailServ.sendConfirmation(
-    //   user.email,
-    //   user.confirmation.code,
-    // );
-    // if (!isMailSent) {
-    //   await user.killYourself();
-    //   throw new ServiceUnavailableException();
-    // }
     return;
   }
 
