@@ -191,4 +191,39 @@ WHERE "userId" = (
       return;
     }
   }
+
+  public async setNewPassword(userId: number, hash: string): Promise<boolean> {
+    let isSuccess: boolean;
+    const queryRunner = this.ds.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      const updatePassword = queryRunner.query(
+        `
+UPDATE ${TablesENUM.USERS}
+SET hash = $2
+WHERE id = $1
+      `,
+        [userId, hash],
+      );
+      const resetRecovery = queryRunner.query(
+        `
+UPDATE ${TablesENUM.RECOVERIES_INFO}
+SET code = NULL, expiration = NULL
+WHERE "userId" = $1
+      `,
+        [userId],
+      );
+      await Promise.all([updatePassword, resetRecovery]);
+      await queryRunner.commitTransaction();
+      isSuccess = true;
+    } catch (e) {
+      isSuccess = false;
+      await queryRunner.rollbackTransaction();
+      console.log(e);
+    } finally {
+      await queryRunner.release();
+      return isSuccess;
+    }
+  }
 }

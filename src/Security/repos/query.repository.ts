@@ -134,4 +134,39 @@ WHERE c.code = $1
       return null;
     }
   }
+
+  public async getUserMetaByRecoveryCode(
+    recoveryCode: string,
+  ): NullablePromise<[UserStatus, Date, number]> {
+    try {
+      const result = await this.ds.query(
+        `
+SELECT 
+u.id,u."isDeleted", ab.status AS "isBanned",c.status AS "isConfirmed", r.expiration
+FROM ${TablesENUM.USERS} AS u
+JOIN ${TablesENUM.CONFIRMATIONS} AS c
+ON u.id = c."userId"
+JOIN ${TablesENUM.USERS_BAN_LIST_BY_ADMIN} AS ab
+ON u.id = ab."userId"
+JOIN ${TablesENUM.RECOVERIES_INFO} AS r
+ON u.id = r."userId"
+WHERE r.code = $1
+      `,
+        [recoveryCode],
+      );
+      if (result.length < 1) {
+        return null;
+      }
+      const [info] = result;
+      const status: UserStatus = {
+        isBanned: info.isBanned,
+        isConfirmed: info.isConfirmed,
+        isDeleted: info.isDeleted,
+      };
+      const exp = info.expiration;
+      return [status, exp, info.id];
+    } catch (e) {
+      return null;
+    }
+  }
 }

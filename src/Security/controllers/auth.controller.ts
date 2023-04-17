@@ -30,8 +30,8 @@ import {
   VoidPromise,
 } from '../../Model';
 import { JwtGuard, Meta } from '../../Base';
-import { RefreshJwtAuthGuard } from '../guard';
 import { command, query } from '../useCases';
+import { RefreshJwtAuthGuard } from '../guard';
 
 @Controller('auth')
 export class AuthController {
@@ -130,10 +130,10 @@ export class AuthController {
     return await this.commandBus.execute(new command.SetRecovery(dto.email));
   }
 
-  // @Post('new-password')
-  // @UseGuards(ThrottlerGuard)
-  // @HttpCode(HttpStatus.NO_CONTENT)
-  // public async changePassword(@Body() dto: RecoveryInput): VoidPromise {
-  //   return await this.commandBus.execute(new command.ChangePassword(dto));
-  // }
+  @Post('new-password')
+  @UseGuards(ThrottlerGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  public async changePassword(@Body() dto: RecoveryInput): VoidPromise {
+    return await this.commandBus.execute(new command.ChangePassword(dto));
+  }
 }
