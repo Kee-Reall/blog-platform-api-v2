@@ -1,5 +1,7 @@
+import { FastifyReply } from 'fastify';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ThrottlerGuard } from '@nestjs/throttler';
+import { CookieSerializeOptions } from '@fastify/cookie';
 import {
   Body,
   Controller,
@@ -28,8 +30,6 @@ import {
   VoidPromise,
 } from '../../Model';
 import { JwtGuard, Meta } from '../../Base';
-import { FastifyReply } from 'fastify';
-import { CookieSerializeOptions } from '@fastify/cookie';
 import { RefreshJwtAuthGuard } from '../guard';
 import { command, query } from '../useCases';
 
