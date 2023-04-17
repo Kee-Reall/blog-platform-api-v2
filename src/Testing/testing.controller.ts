@@ -6,7 +6,7 @@ import {
   HttpStatus,
   Req,
 } from '@nestjs/common';
-import { FastifyRequest } from 'fastify';
+import { Request } from 'express';
 import { DataSource } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { TablesENUM } from '../Helpers/SQL';
@@ -28,27 +28,13 @@ export class TestingController {
     return;
   }
   @Get('always-ok')
-  public async alwaysOk(@Req() req: FastifyRequest) {
-    const {
-      headers,
-      hostname,
-      routeConfig,
-      routerPath,
-      protocol,
-      query,
-      url,
-      ip,
-      body,
-      params,
-      ips,
-      id,
-    } = req;
+  public async alwaysOk(@Req() req: Request) {
+    const { headers, hostname, protocol, query, url, ip, body, params, ips } =
+      req;
     return {
       alwaysOkResponse: {
         headers,
         hostname,
-        routeConfig,
-        routerPath,
         protocol,
         query,
         url,
@@ -56,7 +42,6 @@ export class TestingController {
         body,
         params,
         ips,
-        id,
       },
     };
   }

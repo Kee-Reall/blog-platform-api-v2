@@ -1,7 +1,5 @@
-import { FastifyReply } from 'fastify';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ThrottlerGuard } from '@nestjs/throttler';
-import { CookieSerializeOptions } from '@fastify/cookie';
 import {
   Body,
   Controller,
@@ -32,11 +30,11 @@ import {
 import { JwtGuard, Meta } from '../../Base';
 import { command, query } from '../useCases';
 import { RefreshJwtAuthGuard } from '../guard';
+import { CookieOptions, Response } from 'express';
 
 @Controller('auth')
 export class AuthController {
-  private readonly cookiesOptions: CookieSerializeOptions =
-    appConfig.cookiesOptions;
+  private readonly cookiesOptions: CookieOptions = appConfig.cookiesOptions;
 
   constructor(private commandBus: CommandBus, private queryBus: QueryBus) {}
 
@@ -44,7 +42,7 @@ export class AuthController {
   @UseGuards(ThrottlerGuard)
   @HttpCode(HttpStatus.OK)
   public async login(
-    @Res({ passthrough: true }) reply: FastifyReply,
+    @Res({ passthrough: true }) reply: Response,
     @Headers('user-agent') agent: string,
     @Body() dto: LoginInput,
     @Ip() ip: string,
@@ -52,11 +50,7 @@ export class AuthController {
     const tokenPair: TokenPair = await this.commandBus.execute(
       new command.Login(agent, ip, dto),
     );
-    reply.setCookie(
-      'refreshToken',
-      tokenPair.refreshToken,
-      this.cookiesOptions,
-    );
+    reply.cookie('refreshToken', tokenPair.refreshToken, this.cookiesOptions);
     return { accessToken: tokenPair.accessToken };
   }
 
@@ -73,18 +67,14 @@ export class AuthController {
   @UseGuards(RefreshJwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   public async refreshSession(
-    @Res({ passthrough: true }) reply: FastifyReply,
+    @Res({ passthrough: true }) reply: Response,
     @Meta() userMeta: SessionJwtMeta,
     @Ip() ip,
   ): Promise<Pick<TokenPair, 'accessToken'>> {
     const tokenPair: TokenPair = await this.commandBus.execute(
       new command.Refresh(userMeta, ip),
     );
-    reply.setCookie(
-      'refreshToken',
-      tokenPair.refreshToken,
-      this.cookiesOptions,
-    );
+    reply.cookie('refreshToken', tokenPair.refreshToken, this.cookiesOptions);
     return { accessToken: tokenPair.accessToken };
   }
 
@@ -92,7 +82,7 @@ export class AuthController {
   @UseGuards(RefreshJwtAuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   public async logout(
-    @Res({ passthrough: true }) reply: FastifyReply,
+    @Res({ passthrough: true }) reply: Response,
     @Meta() userMeta: SessionJwtMeta,
   ): VoidPromise {
     await this.commandBus.execute(new command.Logout(userMeta));

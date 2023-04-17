@@ -1,5 +1,5 @@
+import { CookieOptions } from 'express';
 import { exceptionFactory } from './exceptionFactory.function';
-import { CookieSerializeOptions } from '@fastify/cookie';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { MailerOptions } from '@nestjs-modules/mailer';
 
@@ -69,7 +69,7 @@ class AppConfig {
     return this.environment.JWT_SECRET;
   }
 
-  get cookiesOptions(): CookieSerializeOptions {
+  get cookiesOptions(): CookieOptions {
     return {
       //domain: this.mode.isDevelopment() ? undefined : this.environment.DOMAIN,
       sameSite: 'none',

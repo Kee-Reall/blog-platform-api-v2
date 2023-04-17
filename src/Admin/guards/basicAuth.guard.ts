@@ -1,4 +1,4 @@
-import { FastifyRequest } from 'fastify';
+import { Request } from 'express';
 import {
   CanActivate,
   ExecutionContext,
@@ -8,7 +8,7 @@ import { appConfig } from '../../Infrastructure';
 
 export class BasicAuthGuard implements CanActivate {
   public canActivate(context: ExecutionContext): boolean {
-    const req = context.switchToHttp().getRequest<FastifyRequest>();
+    const req = context.switchToHttp().getRequest<Request>();
     const authorization = req.headers.authorization;
     if (!authorization) {
       throw new UnauthorizedException();

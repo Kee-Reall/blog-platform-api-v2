@@ -1,21 +1,15 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import {
-  FastifyAdapter,
-  NestFastifyApplication,
-} from '@nestjs/platform-fastify';
-import cookie from '@fastify/cookie';
+import cookieParser from 'cookie-parser';
 import { ValidationPipe } from '@nestjs/common';
 import { appConfig } from './Infrastructure';
 import { GlobalHTTPFilter } from './Base';
 import { callback } from './Helpers/';
+import { NestExpressApplication } from '@nestjs/platform-express';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestFastifyApplication>(
-    AppModule,
-    new FastifyAdapter(),
-  );
-  await app.register(cookie, { secret: appConfig.cookieSecret });
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  await app.use(cookieParser());
   app.useGlobalPipes(new ValidationPipe(appConfig.globalValidatorOptions));
   app.useGlobalFilters(new GlobalHTTPFilter());
   app.setGlobalPrefix('api');

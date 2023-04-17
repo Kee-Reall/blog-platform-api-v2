@@ -51,7 +51,6 @@ RETURNING *
     `,
         [deviceId, ip],
       );
-      console.log(result);
       const [sessions, modified] = result;
       if (modified < 1) {
         return null;

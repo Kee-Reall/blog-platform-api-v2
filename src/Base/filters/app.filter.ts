@@ -5,7 +5,7 @@ import {
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
-import { FastifyReply } from 'fastify';
+import { Response } from 'express';
 
 @Catch(HttpException)
 export class GlobalHTTPFilter implements ExceptionFilter {
@@ -13,11 +13,11 @@ export class GlobalHTTPFilter implements ExceptionFilter {
     const [errorsMessages, status, reply] = [
       exception.getResponse(),
       exception.getStatus(),
-      host.switchToHttp().getResponse<FastifyReply>(),
+      host.switchToHttp().getResponse<Response>(),
     ];
     if (status === HttpStatus.BAD_REQUEST) {
-      return reply.code(status).send(errorsMessages);
+      return reply.status(status).json(errorsMessages);
     }
-    return reply.code(status).send();
+    return reply.sendStatus(status);
   }
 }

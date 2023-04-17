@@ -6,8 +6,8 @@ import { useCases } from './useCases';
 import { EmailService } from './email';
 import { HardJwtAuthStrategy } from '../Base';
 import { appConfig } from '../Infrastructure';
-import { AuthController } from './controllers';
 import { RefreshJwtAuthStrategy } from './strategy';
+import { AuthController, DeviceController } from './controllers';
 import { AuthCommandRepository, AuthQueryRepository } from './repos';
 
 @Module({
@@ -16,7 +16,7 @@ import { AuthCommandRepository, AuthQueryRepository } from './repos';
     JwtModule.register({}),
     ThrottlerModule.forRoot(appConfig.throttlerOptions),
   ],
-  controllers: [AuthController],
+  controllers: [AuthController, DeviceController],
   providers: [
     EmailService,
     AuthQueryRepository,
