@@ -167,4 +167,28 @@ WHERE code = $1
       return false;
     }
   }
+
+  public async setRecoveryStatus(
+    email: string,
+    recoveryCode: string,
+    newDate: Date,
+  ): VoidPromise {
+    try {
+      await this.ds.query(
+        `
+UPDATE ${TablesENUM.RECOVERIES_INFO}
+SET code=$2, expiration=$3
+WHERE "userId" = (
+  SELECT id from ${TablesENUM.USERS}
+  WHERE email = $1
+)
+      `,
+        [email, recoveryCode, newDate],
+      );
+    } catch (e) {
+      console.log(e);
+    } finally {
+      return;
+    }
+  }
 }

@@ -122,14 +122,14 @@ export class AuthController {
   public async confirm(@Body() dto: CodeInput): VoidPromise {
     return await this.commandBus.execute(new command.ConfirmAccount(dto.code));
   }
-  //
-  // @Post('password-recovery')
-  // @UseGuards(ThrottlerGuard)
-  // @HttpCode(HttpStatus.NO_CONTENT)
-  // public async recoveryPassword(@Body() dto: EmailInput): VoidPromise {
-  //   return await this.commandBus.execute(new command.SetRecovery(dto.email));
-  // }
-  //
+
+  @Post('password-recovery')
+  @UseGuards(ThrottlerGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  public async recoveryPassword(@Body() dto: EmailInput): VoidPromise {
+    return await this.commandBus.execute(new command.SetRecovery(dto.email));
+  }
+
   // @Post('new-password')
   // @UseGuards(ThrottlerGuard)
   // @HttpCode(HttpStatus.NO_CONTENT)
