@@ -225,4 +225,22 @@ WHERE "userId" = $1
       return isSuccess;
     }
   }
+
+  public async killAllSessionsExcludeCurrent(
+    userId: number,
+    excludedDeviceId: number,
+  ) {
+    try {
+      await this.ds.query(
+        `
+DELETE FROM ${TablesENUM.SESSIONS} WHERE "userId" = $1 AND "deviceId" != $2
+      `,
+        [userId, excludedDeviceId],
+      );
+    } catch (e) {
+      console.log(e);
+    } finally {
+      return;
+    }
+  }
 }

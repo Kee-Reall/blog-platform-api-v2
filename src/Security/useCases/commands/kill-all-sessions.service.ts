@@ -1,6 +1,7 @@
-import { SessionJwtMeta, VoidPromise } from '../../../Model';
+import { UnauthorizedException } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { SecurityService } from '../base';
+import { SessionJwtMeta, VoidPromise } from '../../../Model';
 import { AuthCommandRepository, AuthQueryRepository } from '../../repos';
 
 export class KillAllSessionsExcludeCurrent implements SessionJwtMeta {
@@ -26,14 +27,16 @@ export class KillingAllSessionsExcludeCurrentUseCase
     super();
   }
   public async execute(command: KillAllSessionsExcludeCurrent): VoidPromise {
-    // const session = await this.queryRepo.findSession(command.deviceId);
-    // if (!session) {
-    //   throw new UnauthorizedException();
-    // }
-    // if (!this.checkValidMeta(command, session)) {
-    //   throw new UnauthorizedException();
-    // }
-    // return await this.commandRepo.killAllSessionsExcludeCurrent(command);
-    return;
+    const session = await this.queryRepo.getSession(command.deviceId);
+    if (!session) {
+      throw new UnauthorizedException();
+    }
+    if (!this.checkValidMeta(command, session)) {
+      throw new UnauthorizedException();
+    }
+    return await this.commandRepo.killAllSessionsExcludeCurrent(
+      command.userId,
+      command.deviceId,
+    );
   }
 }

@@ -15,7 +15,10 @@ export class GetUserInfoUseCase implements IQueryHandler<GetUserInfo> {
 
   public async execute(query: GetUserInfo): Promise<UserInfoType> {
     const result = await this.ds.query(
-      `SELECT email, login, id FROM ${TablesENUM.USERS} WHERE id = $1`,
+      `
+SELECT email, login, id::VARCHAR
+FROM ${TablesENUM.USERS} WHERE id = $1
+`,
       [query.userId],
     );
     if (result.length < 1) {

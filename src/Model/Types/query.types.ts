@@ -1,35 +1,28 @@
-import { BlogPresentationModel } from './blogs.types';
-import { PostPresentationModel } from './posts.types';
-import { UserPresentationModel } from './users.types';
-import { CommentsLogicModel } from './comments.types';
+export type Direction = 'ASC' | 'DESC' | 'asc' | 'desc';
 
-export type Direction = 'asc' | 'desc';
-
-export interface AbstractFilter<T> {
+export interface AbstractFilter {
   pageNumber?: number;
   pageSize?: number;
-  sortBy?: string | keyof T;
+  sortBy?: string;
   sortDirection?: Direction;
 }
 
-export interface BlogFilter extends AbstractFilter<BlogPresentationModel> {
+export interface BlogFilter extends AbstractFilter {
   searchNameTerm?: string;
 }
 
-export type PostFilter = AbstractFilter<PostPresentationModel>;
+export type PostFilter = AbstractFilter;
 
-export interface UsersForAdminFilter
-  extends AbstractFilter<UserPresentationModel> {
+export interface UsersForAdminFilter extends AbstractFilter {
   searchLoginTerm?: string;
   searchEmailTerm?: string;
   banStatus?: string;
 }
 
-export interface UsersForBloggerFilter
-  extends AbstractFilter<{ login: string }> {
+export interface UsersForBloggerFilter extends AbstractFilter {
   searchLoginTerm?: string;
 }
 
-export type CommentsFilter = AbstractFilter<CommentsLogicModel>;
+export type CommentsFilter = AbstractFilter;
 
 export type BanQuery = 'all' | 'banned' | 'notBanned';

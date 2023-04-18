@@ -170,4 +170,19 @@ WHERE r.code = $1
       return null;
     }
   }
+
+  public async getSessions(userId: number) {
+    try {
+      return await this.ds.query(
+        `
+SELECT "lastIP" AS ip, title, "updateDate" AS "lastActiveDate",
+"deviceId"::VARCHAR FROM ${TablesENUM.SESSIONS} WHERE "userId" = $1
+      `,
+        [userId],
+      );
+    } catch (e) {
+      console.log(e);
+      return [];
+    }
+  }
 }

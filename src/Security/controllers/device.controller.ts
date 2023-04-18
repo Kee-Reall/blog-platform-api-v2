@@ -20,8 +20,7 @@ export class DeviceController {
   @Get()
   @HttpCode(HttpStatus.OK)
   public async getDevices(@Meta() userMeta: SessionJwtMeta) {
-    console.log('sa');
-    //return await this.queryBus.execute(new query.GetSessions(userMeta));
+    return await this.queryBus.execute(new query.GetSessions(userMeta));
   }
 
   @Delete()
@@ -29,9 +28,9 @@ export class DeviceController {
   public async deleteSessionsExcludeCurrent(
     @Meta() userMeta: SessionJwtMeta,
   ): VoidPromise {
-    // await this.commandBus.execute(
-    //   new command.KillAllSessionsExcludeCurrent(userMeta),
-    // );
+    await this.commandBus.execute(
+      new command.KillAllSessionsExcludeCurrent(userMeta),
+    );
     return;
   }
 

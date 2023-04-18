@@ -13,10 +13,11 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { BanUserInput, UserInput } from '../validators';
-import { adminCommand, adminQuery } from '../useCases';
-import { UsersForAdminFilter } from '../../Model';
 import { BasicAuthGuard } from '../guards';
+import { IUserPaginationConfig } from '../../Model';
+import { adminCommand, adminQuery } from '../useCases';
+import { BanUserInput, UserInput } from '../validators';
+import { UserPaginationPipe } from '../pipes/userPagination.pipe';
 
 @Controller('sa/users')
 @UseGuards(BasicAuthGuard)
@@ -24,8 +25,10 @@ export class AdminUsersController {
   constructor(private commandBus: CommandBus, private queryBus: QueryBus) {}
 
   @Get()
-  public async getUsersForAdmin(@Query() fltr: UsersForAdminFilter) {
-    return await this.queryBus.execute(new adminQuery.GetPaginatedUsers(fltr));
+  public async getUsersForAdmin(
+    @Query(UserPaginationPipe) cfg: IUserPaginationConfig,
+  ) {
+    return await this.queryBus.execute(new adminQuery.GetPaginatedUsers(cfg));
   }
 
   @Post()

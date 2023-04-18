@@ -24,14 +24,13 @@ export class GetSessionsUseCase
     super();
   }
   public async execute(query: GetSessions): NullablePromise<any> {
-    // const session = await this.repo.findSession(query.deviceId);
-    // if (!session) {
-    //   throw new UnauthorizedException();
-    // }
-    // if (!this.checkValidMeta(query, session)) {
-    //   throw new UnauthorizedException();
-    // }
-    // return await this.repo.getSessions(query.userId);
-    return;
+    const session = await this.repo.getSession(query.deviceId);
+    if (!session) {
+      throw new UnauthorizedException();
+    }
+    if (!this.checkValidMeta(query, session)) {
+      throw new UnauthorizedException();
+    }
+    return await this.repo.getSessions(query.userId);
   }
 }

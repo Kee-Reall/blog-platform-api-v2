@@ -1,4 +1,19 @@
-export type SortDirection = 'asc' | 'desc';
+import { Direction as SortDirection } from './query.types';
+import { Nullable } from './helpers.types';
+
+export interface IPaginationConfig {
+  sortBy: string;
+  shouldSkip: number;
+  limit: number;
+  sortDirection: SortDirection;
+  pageNumber: number;
+}
+
+export interface IUserPaginationConfig extends IPaginationConfig {
+  login: Nullable<string>;
+  email: Nullable<string>;
+  banStatus: Nullable<boolean>;
+}
 
 export type PaginatedOutput<Data> = {
   pagesCount: number;
