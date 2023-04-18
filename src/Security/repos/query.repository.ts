@@ -2,13 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { TablesENUM } from '../../Helpers/SQL';
+import { AbstractRepository } from '../../Base';
 import {
   NullablePromise,
-  SessionsFromDb,
+  SessionJwtMeta,
   UserForLogin,
   UserStatus,
 } from '../../Model';
-import { AbstractRepository } from '../../Base';
 
 @Injectable()
 export class AuthQueryRepository extends AbstractRepository {
@@ -47,11 +47,11 @@ WHERE u.login = $1 OR u.email = $1
     }
   }
 
-  public async getSession(deviceId: number): NullablePromise<SessionsFromDb> {
+  public async getSession(deviceId: number): NullablePromise<SessionJwtMeta> {
     try {
       const result = await this.ds.query(
         `
-SELECT s."userId", s."updateDate" FROM ${TablesENUM.SESSIONS} AS s
+SELECT s."deviceId", s."userId", s."updateDate" FROM ${TablesENUM.SESSIONS} AS s
 JOIN ${TablesENUM.USERS} AS u ON u.id = s."userId"
 JOIN ${TablesENUM.USERS_BAN_LIST_BY_ADMIN} AS ab ON u.id = ab."userId"
 WHERE s."deviceId" = $1 AND u."isDeleted" = false AND ab.status = false
@@ -65,6 +65,7 @@ WHERE s."deviceId" = $1 AND u."isDeleted" = false AND ab.status = false
       return {
         updateDate: session.updateDate.toISOString(),
         userId: session.userId,
+        deviceId: session.deviceId,
       };
     } catch (e) {
       return null;

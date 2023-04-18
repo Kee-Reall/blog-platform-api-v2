@@ -6,19 +6,15 @@ import {
   HttpCode,
   HttpStatus,
   Param,
-  ParseIntPipe,
-  Post,
-  Req,
   UseGuards,
 } from '@nestjs/common';
-import { Meta } from '../../Base';
+import { Meta, ParseIntCustomPipe } from '../../Base';
 import { command, query } from '../useCases';
 import { RefreshJwtAuthGuard } from '../guard';
 import { SessionJwtMeta, VoidPromise } from '../../Model';
-import { Request } from 'express';
 
 @Controller('security/devices')
-//@UseGuards(RefreshJwtAuthGuard)
+@UseGuards(RefreshJwtAuthGuard)
 export class DeviceController {
   constructor(private commandBus: CommandBus, private queryBus: QueryBus) {}
   @Get()
@@ -40,14 +36,12 @@ export class DeviceController {
   }
 
   @Delete(':id')
-  //@HttpCode(HttpStatus.NO_CONTENT)
+  @HttpCode(HttpStatus.NO_CONTENT)
   public async deleteSessionById(
-    @Req() req: Request,
     @Meta() userMeta: SessionJwtMeta,
-    @Param('id') deviceId: number,
+    @Param('id', ParseIntCustomPipe) deviceId: number,
   ): VoidPromise {
-    console.log(req.cookies);
-    //await this.commandBus.execute(new command.KillSession(deviceId, userMeta));
+    await this.commandBus.execute(new command.KillSession(deviceId, userMeta));
     return;
   }
 }

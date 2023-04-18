@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { SecurityService } from '../base';
 import { SessionJwtMeta } from '../../../Model';
-import { AuthQueryRepository } from '../../repos';
+import { AuthCommandRepository, AuthQueryRepository } from '../../repos';
 
 export class KillSession {
   constructor(public deviceId: number, public meta: SessionJwtMeta) {}
@@ -17,7 +17,10 @@ export class SessionKillingUseCase
   extends SecurityService
   implements ICommandHandler<KillSession>
 {
-  constructor(private queryRepo: AuthQueryRepository) {
+  constructor(
+    private queryRepo: AuthQueryRepository,
+    private commandRepo: AuthCommandRepository,
+  ) {
     super();
   }
   public async execute(command: KillSession): Promise<any> {
@@ -37,8 +40,7 @@ export class SessionKillingUseCase
     if (session.userId !== currentSession.userId) {
       throw new ForbiddenException();
     }
-    console.log('delete session');
-    // await session.killYourself();
+    await this.commandRepo.killSession(session);
     return;
   }
 }

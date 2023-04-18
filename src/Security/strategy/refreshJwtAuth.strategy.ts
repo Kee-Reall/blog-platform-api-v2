@@ -16,7 +16,6 @@ export class RefreshJwtAuthStrategy extends PassportStrategy(
           if (!req.cookies && !req.cookies.hasOwnProperty('refreshToken')) {
             throw new UnauthorizedException();
           }
-          console.log(req.cookies);
           return req.cookies.refreshToken;
         },
       ]),
@@ -25,7 +24,6 @@ export class RefreshJwtAuthStrategy extends PassportStrategy(
     });
   }
   public async validate(payload: object): Promise<SessionJwtMeta> {
-    console.log('sass');
     const requiredProperty = ['deviceId', 'userId', 'updateDate'];
     const hasAllProperty = requiredProperty.every((el) =>
       payload.hasOwnProperty(el),
