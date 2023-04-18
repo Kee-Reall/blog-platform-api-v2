@@ -50,13 +50,12 @@ WHERE ${this.generateBanStatusSlice(query.banStatus)} (
   u.login ILIKE '%' || COALESCE($1, '') || '%' 
   OR
   u.email ILIKE '%' || COALESCE($2, '') || '%'
-)
+) AND u."isDeleted" = false
 ${this.generateOrder(query.sortBy, query.sortDirection)}
 LIMIT $3 OFFSET $4
           `,
         [query.login, query.email, query.limit, query.shouldSkip],
       );
-      console.log(result);
       const items: WithBanInfo<UserPresentationModel>[] = result.map((raw) => ({
         id: raw.id,
         login: raw.login,
@@ -78,12 +77,11 @@ WHERE ${this.generateBanStatusSlice(query.banStatus)} (
   u.login ILIKE '%' || COALESCE($1, '') || '%' 
   OR
   u.email ILIKE '%' || COALESCE($2, '') || '%'
-)
+) AND u."isDeleted" = false
       `,
         [query.login, query.email],
       );
       const totalCount = count[0].count;
-      console.log(totalCount);
       return {
         pagesCount: Math.ceil(totalCount / query.limit),
         page: query.pageNumber,

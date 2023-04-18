@@ -2,7 +2,7 @@ import { UnauthorizedException } from '@nestjs/common';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { SecurityService } from '../base';
 import { AuthQueryRepository } from '../../repos';
-import { NullablePromise, SessionJwtMeta } from '../../../Model';
+import { SessionJwtMeta, SessionPresentation } from '../../../Model';
 
 export class GetSessions implements SessionJwtMeta {
   deviceId: number;
@@ -23,7 +23,7 @@ export class GetSessionsUseCase
   constructor(private repo: AuthQueryRepository) {
     super();
   }
-  public async execute(query: GetSessions): NullablePromise<any> {
+  public async execute(query: GetSessions): Promise<SessionPresentation[]> {
     const session = await this.repo.getSession(query.deviceId);
     if (!session) {
       throw new UnauthorizedException();
@@ -31,6 +31,6 @@ export class GetSessionsUseCase
     if (!this.checkValidMeta(query, session)) {
       throw new UnauthorizedException();
     }
-    return await this.repo.getSessions(query.userId);
+    return await this.repo.getAllSessions(query.userId);
   }
 }

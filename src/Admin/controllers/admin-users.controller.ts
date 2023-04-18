@@ -17,7 +17,8 @@ import { BasicAuthGuard } from '../guards';
 import { IUserPaginationConfig } from '../../Model';
 import { adminCommand, adminQuery } from '../useCases';
 import { BanUserInput, UserInput } from '../validators';
-import { UserPaginationPipe } from '../pipes/userPagination.pipe';
+import { UserPaginationPipe } from '../pipes';
+import { ParseIntCustomPipe } from '../../Base';
 
 @Controller('sa/users')
 @UseGuards(BasicAuthGuard)
@@ -38,7 +39,7 @@ export class AdminUsersController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  public async deleteUser(@Param('id', ParseIntPipe) userId: number) {
+  public async deleteUser(@Param('id', ParseIntCustomPipe) userId: number) {
     return await this.commandBus.execute(new adminCommand.DeleteUser(userId));
   }
 

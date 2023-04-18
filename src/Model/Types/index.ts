@@ -4,6 +4,7 @@ export * from './pagination.types';
 export * from './comments.types';
 export * from './response.type';
 export * from './helpers.types';
+export * from './session.types';
 export * from './likes.types';
 export * from './blogs.types';
 export * from './posts.types';

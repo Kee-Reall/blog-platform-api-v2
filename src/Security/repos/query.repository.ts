@@ -6,6 +6,7 @@ import { AbstractRepository } from '../../Base';
 import {
   NullablePromise,
   SessionJwtMeta,
+  SessionPresentation,
   UserForLogin,
   UserStatus,
 } from '../../Model';
@@ -171,7 +172,7 @@ WHERE r.code = $1
     }
   }
 
-  public async getSessions(userId: number) {
+  public async getAllSessions(userId: number): Promise<SessionPresentation[]> {
     try {
       return await this.ds.query(
         `

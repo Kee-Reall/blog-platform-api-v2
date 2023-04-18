@@ -42,4 +42,20 @@ RETURNING id
       return contract;
     }
   }
+
+  public async deleteUser(userId: number) {
+    try {
+      await this.ds.query(
+        `
+UPDATE ${TablesENUM.USERS}
+SET "isDeleted" = true
+WHERE id = $1
+    `,
+        [userId],
+      );
+    } catch (e) {
+      console.log(e);
+    }
+    return;
+  }
 }

@@ -4,11 +4,13 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import {
   DbRowMessage,
   Nullable,
+  NullablePromise,
   UserPresentationModel,
+  UserStatus,
   WithBanInfo,
 } from '../../Model';
 import { TablesENUM } from '../../Helpers/SQL';
-import { AbstractRepository } from '../../Base/classes/abstracts/repository.class';
+import { AbstractRepository } from '../../Base';
 
 @Injectable()
 export class AdminQueryRepository extends AbstractRepository {
@@ -29,6 +31,24 @@ export class AdminQueryRepository extends AbstractRepository {
     //     `,
     //       [login, email],
     //     );
+  }
+
+  public async getUserBeforeDelete(
+    id: number,
+  ): NullablePromise<Pick<UserStatus, 'isDeleted'>> {
+    try {
+      const res = await this.ds.query(
+        `SELECT "isDeleted" FROM ${TablesENUM.USERS} WHERE id = $1`,
+        [id],
+      );
+      if (res.length < 1) {
+        return null;
+      }
+      return res[0];
+    } catch (e) {
+      console.log(e);
+      return null;
+    }
   }
 
   public async getUser(

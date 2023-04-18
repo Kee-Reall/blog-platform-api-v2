@@ -11,7 +11,7 @@ import {
 import { Meta, ParseIntCustomPipe } from '../../Base';
 import { command, query } from '../useCases';
 import { RefreshJwtAuthGuard } from '../guard';
-import { SessionJwtMeta, VoidPromise } from '../../Model';
+import { SessionJwtMeta, SessionPresentation, VoidPromise } from '../../Model';
 
 @Controller('security/devices')
 @UseGuards(RefreshJwtAuthGuard)
@@ -19,7 +19,9 @@ export class DeviceController {
   constructor(private commandBus: CommandBus, private queryBus: QueryBus) {}
   @Get()
   @HttpCode(HttpStatus.OK)
-  public async getDevices(@Meta() userMeta: SessionJwtMeta) {
+  public async getDevices(
+    @Meta() userMeta: SessionJwtMeta,
+  ): Promise<SessionPresentation[]> {
     return await this.queryBus.execute(new query.GetSessions(userMeta));
   }
 
