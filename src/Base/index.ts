@@ -5,3 +5,4 @@ export * from './classes';
 export * from './filters';
 export * from './guards';
 export * from './enums';
+export * from './pipes';
