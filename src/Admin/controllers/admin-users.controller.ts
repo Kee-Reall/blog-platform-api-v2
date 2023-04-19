@@ -14,11 +14,11 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { BasicAuthGuard } from '../guards';
+import { UserPaginationPipe } from '../pipes';
+import { ParseIntCustomPipe } from '../../Base';
 import { IUserPaginationConfig } from '../../Model';
 import { adminCommand, adminQuery } from '../useCases';
 import { BanUserInput, UserInput } from '../validators';
-import { UserPaginationPipe } from '../pipes';
-import { ParseIntCustomPipe } from '../../Base';
 
 @Controller('sa/users')
 @UseGuards(BasicAuthGuard)
