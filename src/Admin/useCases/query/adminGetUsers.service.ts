@@ -53,7 +53,6 @@ WHERE ${this.generateBanStatusSlice(query.banStatus)} (
 ${this.generateOrder(query.sortBy, query.sortDirection)}
 LIMIT $3 OFFSET $4
       `;
-      console.log(queryStr);
       const result: any[] = await this.ds.query(queryStr, [
         query.login,
         query.email,

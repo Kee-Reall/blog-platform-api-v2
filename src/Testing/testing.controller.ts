@@ -17,14 +17,13 @@ export class TestingController {
   @Delete('all-data')
   @HttpCode(HttpStatus.NO_CONTENT)
   public async clearDb() {
-    const res = await Promise.allSettled([
+    await Promise.allSettled([
       this.ds.query(`DELETE FROM ${TablesENUM.USERS}`),
       this.ds.query(`DELETE FROM ${TablesENUM.USERS_BAN_LIST_BY_ADMIN}`),
       this.ds.query(`DELETE FROM ${TablesENUM.CONFIRMATIONS}`),
       this.ds.query(`DELETE FROM ${TablesENUM.RECOVERIES_INFO}`),
       this.ds.query(`DELETE FROM ${TablesENUM.SESSIONS}`),
     ]);
-    console.log(res);
     return;
   }
   @Get('always-ok')
