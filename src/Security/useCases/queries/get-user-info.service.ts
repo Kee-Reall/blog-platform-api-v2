@@ -17,8 +17,9 @@ export class GetUserInfoUseCase implements IQueryHandler<GetUserInfo> {
     const result = await this.ds.query(
       `
 SELECT email, login, id::VARCHAR
-FROM ${TablesENUM.USERS} WHERE id = $1
-`,
+FROM ${TablesENUM.USERS} 
+WHERE id = $1 AND "isDeleted" = false
+    `,
       [query.userId],
     );
     if (result.length < 1) {

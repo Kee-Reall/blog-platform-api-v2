@@ -55,12 +55,14 @@ export class AdminQueryRepository extends AbstractRepository {
     id: number,
   ): Promise<Nullable<WithBanInfo<UserPresentationModel>>> {
     try {
-      console.log(id);
       const result = await this.ds.query(
         `
-SELECT u.id, u.login, u.email, u."createdAt",b.date,b.status,b.reason FROM ${TablesENUM.USERS} AS u
+SELECT 
+u.id::VARCHAR, u.login, u.email, u."createdAt", b.date, b.status, b.reason
+FROM ${TablesENUM.USERS} AS u
 JOIN ${TablesENUM.USERS_BAN_LIST_BY_ADMIN} AS b
-ON u."id" = b."userId" WHERE id = $1
+ON u."id" = b."userId" 
+WHERE u.id = $1 AND u."isDeleted" = false
       `,
         [id],
       );
@@ -69,7 +71,7 @@ ON u."id" = b."userId" WHERE id = $1
       }
       const row = result[0];
       return {
-        id: row.id.toString(),
+        id: row.id,
         login: row.login,
         email: row.email,
         createdAt: row.createdAt,

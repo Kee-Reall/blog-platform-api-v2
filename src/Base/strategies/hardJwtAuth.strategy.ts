@@ -24,10 +24,14 @@ export class HardJwtAuthStrategy extends PassportStrategy(Strategy) {
     const { userId } = payload as AccessTokenPayload;
     const result = await this.ds.query(
       `
-SELECT ab.status AS ban,u."isDeleted" FROM ${TablesENUM.USERS_BAN_LIST_BY_ADMIN} AS ab
-RIGHT JOIN ${TablesENUM.USERS} AS u ON u.id = ab."userId"
-WHERE u.id = $1
-`,
+SELECT ab.status AS ban, u."isDeleted" 
+FROM ${TablesENUM.USERS} AS u
+JOIN ${TablesENUM.USERS_BAN_LIST_BY_ADMIN} AS ab
+ON u.id = ab."userId"
+JOIN ${TablesENUM.CONFIRMATIONS} AS c 
+ON u.id = c."userId"
+WHERE u.id = $1 AND c.status = true
+      `,
       [userId],
     );
     console.log(result);
