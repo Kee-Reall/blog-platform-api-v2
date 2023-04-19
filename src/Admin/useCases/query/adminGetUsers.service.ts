@@ -38,8 +38,7 @@ export class AdminGetUsersHandler implements IQueryHandler<GetPaginatedUsers> {
     query: GetPaginatedUsers,
   ): Promise<PaginatedOutput<WithBanInfo<UserPresentationModel>>> {
     try {
-      const result: any[] = await this.ds.query(
-        `
+      const queryStr = `
 SELECT
 u.id::VARCHAR, u.login, u.email, u."createdAt",
 ab.status, ab.reason, ab.date as "banDate"
@@ -53,9 +52,14 @@ WHERE ${this.generateBanStatusSlice(query.banStatus)} (
 ) AND u."isDeleted" = false
 ${this.generateOrder(query.sortBy, query.sortDirection)}
 LIMIT $3 OFFSET $4
-          `,
-        [query.login, query.email, query.limit, query.shouldSkip],
-      );
+      `;
+      console.log(queryStr);
+      const result: any[] = await this.ds.query(queryStr, [
+        query.login,
+        query.email,
+        query.limit,
+        query.shouldSkip,
+      ]);
       const items: WithBanInfo<UserPresentationModel>[] = result.map((raw) => ({
         id: raw.id,
         login: raw.login,
@@ -105,7 +109,7 @@ WHERE ${this.generateBanStatusSlice(query.banStatus)} (
     }
   }
 
-  private generateOrder(order: string, desc: Direction): string {
+  private generateOrder(order: string, direction: Direction): string {
     let result = 'ORDER BY';
     switch (order) {
       case 'id':
@@ -120,11 +124,12 @@ WHERE ${this.generateBanStatusSlice(query.banStatus)} (
       default:
         result = 'ORDER BY u."createdAt"';
     }
-    if (desc === 'ASC') {
+    if (direction === 'ASC') {
       result += ' ASC';
     } else {
       result += ' DESC';
     }
+    console.log(result);
     return result;
   }
 }
