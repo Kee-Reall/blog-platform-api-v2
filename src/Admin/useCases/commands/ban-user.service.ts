@@ -31,7 +31,7 @@ export class BanUserUseCase implements ICommandHandler<BanUser> {
     }
     if (user.banInfo.isBanned) {
       if (command.isBanned) {
-        this.BannedBeforeAndBanedAfter(user, command.banReason);
+        await this.BannedBeforeAndBanedAfter(user, command.banReason);
       } else {
         await this.BannedBeforeAndNotBannedAfter(user);
       }
@@ -47,7 +47,6 @@ export class BanUserUseCase implements ICommandHandler<BanUser> {
     user: WithBanInfo<UserPresentationModel>,
     banReason: string,
   ): VoidPromise {
-    //@ts-ignore
     return await this.commandRepo.banUser(+user.id, banReason);
   }
   private async BannedBeforeAndBanedAfter(
@@ -57,16 +56,11 @@ export class BanUserUseCase implements ICommandHandler<BanUser> {
     if (user.banInfo.banReason === banReason) {
       return;
     }
-    //@ts-ignore
-    await this.commandRepo.update;
+    await this.commandRepo.updateBanReason(+user.id, banReason);
   }
   private async BannedBeforeAndNotBannedAfter(
     user: WithBanInfo<UserPresentationModel>,
   ): VoidPromise {
-    user.banInfo.isBanned = false;
-    user.banInfo.banReason = null;
-    user.banInfo.banDate = null;
-    //@ts-ignore
-    return await this.commandRepo.banUserEntities(user._id, false);
+    return await this.commandRepo.unbanUser(+user.id);
   }
 }

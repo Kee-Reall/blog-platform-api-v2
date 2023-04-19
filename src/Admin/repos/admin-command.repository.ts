@@ -3,7 +3,7 @@ import { DataSource, QueryRunner } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { CreationContract } from '../../Base';
 import { TablesENUM } from '../../Helpers/SQL';
-import { UserCreationModel } from '../../Model';
+import { UserCreationModel, VoidPromise } from '../../Model';
 
 @Injectable()
 export class AdminCommandRepository {
@@ -51,6 +51,54 @@ UPDATE ${TablesENUM.USERS}
 SET "isDeleted" = true
 WHERE id = $1
     `,
+        [userId],
+      );
+    } catch (e) {
+      console.log(e);
+    }
+    return;
+  }
+
+  public async banUser(userId: number, banReason: string): VoidPromise {
+    try {
+      await this.ds.query(
+        `
+UPDATE ${TablesENUM.USERS_BAN_LIST_BY_ADMIN}
+SET status = true, reason = $2, date = NOW()
+WHERE "userId" = $1
+      `,
+        [userId, banReason],
+      );
+    } catch (e) {
+      console.log(e);
+    }
+    return;
+  }
+
+  public async updateBanReason(userId: number, banReason: string): VoidPromise {
+    try {
+      await this.ds.query(
+        `
+UPDATE ${TablesENUM.USERS_BAN_LIST_BY_ADMIN}
+SET reason = $2
+WHERE "userId" = $1
+      `,
+        [userId, banReason],
+      );
+    } catch (e) {
+      console.log(e);
+    }
+    return;
+  }
+
+  public async unbanUser(userId: number): VoidPromise {
+    try {
+      await this.ds.query(
+        `
+UPDATE ${TablesENUM.USERS_BAN_LIST_BY_ADMIN}
+SET status = false , date = NULL, reason = NULL
+WHERE "userId" = $1
+      `,
         [userId],
       );
     } catch (e) {
