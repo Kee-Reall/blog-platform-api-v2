@@ -53,7 +53,10 @@ export class BanUserUseCase implements ICommandHandler<BanUser> {
     user: WithBanInfo<UserPresentationModel>,
     banReason: string,
   ): VoidPromise {
-    if (user.banInfo.banReason === banReason) {
+    if (
+      user.banInfo.banReason.trim().toLowerCase() ===
+      banReason.trim().toLowerCase()
+    ) {
       return;
     }
     await this.commandRepo.updateBanReason(+user.id, banReason);
