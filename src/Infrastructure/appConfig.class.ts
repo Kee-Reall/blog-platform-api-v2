@@ -96,7 +96,7 @@ class AppConfig {
       database: this.environment.DB_NAME,
       synchronize: false,
       autoLoadEntities: false,
-      ssl: true,
+      ssl: !this.mode.isDevelopment(),
     };
   }
   get globalValidatorOptions() {
