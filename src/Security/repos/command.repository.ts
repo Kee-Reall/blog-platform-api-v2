@@ -15,7 +15,7 @@ import { CreationContract } from '../../Base';
 export class AuthCommandRepository {
   constructor(@InjectDataSource() private ds: DataSource) {}
   public async createSession(
-    id: number,
+    userId: number,
     agent: string,
     ip: string,
   ): NullablePromise<SessionJwtMeta> {
@@ -24,9 +24,9 @@ export class AuthCommandRepository {
         `
 INSERT INTO ${TablesENUM.SESSIONS}("userId","updateDate", "lastIP", title)
 VALUES ($1,NOW(),$2,$3)
-RETURNING "deviceId","userId","updateDate"
+RETURNING "deviceId"::VARCHAR,"userId","updateDate"
     `,
-        [id, ip, agent],
+        [userId, ip, agent],
       );
       if (result.length < 1) {
         return null;
@@ -47,7 +47,7 @@ RETURNING "deviceId","userId","updateDate"
 UPDATE ${TablesENUM.SESSIONS}
 SET "updateDate"=NOW(), "lastIP"=$2
 WHERE "deviceId" = $1
-RETURNING *
+RETURNING "userId", "deviceId"::VARCHAR, "updateDate"
     `,
         [deviceId, ip],
       );
