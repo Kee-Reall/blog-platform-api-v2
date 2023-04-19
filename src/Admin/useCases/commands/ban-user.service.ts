@@ -1,5 +1,12 @@
+import { NotFoundException } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { BanUserInputModel, VoidPromise } from '../../../Model';
+import { AdminCommandRepository, AdminQueryRepository } from '../../repos';
+import {
+  BanUserInputModel,
+  UserPresentationModel,
+  VoidPromise,
+  WithBanInfo,
+} from '../../../Model';
 
 export class BanUser implements BanUserInputModel {
   public banReason: string;
@@ -13,60 +20,53 @@ export class BanUser implements BanUserInputModel {
 
 @CommandHandler(BanUser)
 export class BanUserUseCase implements ICommandHandler<BanUser> {
+  constructor(
+    private queryRepo: AdminQueryRepository,
+    private commandRepo: AdminCommandRepository,
+  ) {}
   public async execute(command: BanUser): VoidPromise {
-    // const user = await this.queryRepo.getUserEntity(command.userId);
-    // if (!user) {
-    //   throw new NotFoundException();
-    // }
-    // let shouldSave = false;
-    // if (user.banInfo.isBanned) {
-    //   if (command.isBanned) {
-    //     shouldSave = this.BannedBeforeAndBanedAfter(user, command.banReason);
-    //   } else {
-    //     shouldSave = await this.BannedBeforeAndNotBannedAfter(user);
-    //   }
-    // } else {
-    //   if (command.isBanned) {
-    //     shouldSave = await this.NotBannedBeforeAndBanedAfter(
-    //       user,
-    //       command.banReason,
-    //     );
-    //   }
-    // }
-    // if (shouldSave) {
-    //   const isSaved = await this.commandRepo.saveUser(user);
-    //   if (!isSaved) {
-    //     throw new ImATeapotException();
-    //   }
-    // }
+    const user = await this.queryRepo.getUser(command.userId);
+    if (!user) {
+      throw new NotFoundException();
+    }
+    if (user.banInfo.isBanned) {
+      if (command.isBanned) {
+        this.BannedBeforeAndBanedAfter(user, command.banReason);
+      } else {
+        await this.BannedBeforeAndNotBannedAfter(user);
+      }
+    } else {
+      if (command.isBanned) {
+        await this.NotBannedBeforeAndBanedAfter(user, command.banReason);
+      }
+    }
     return;
   }
 
-  // private async NotBannedBeforeAndBanedAfter(
-  //   user: UserDocument,
-  //   banReason: string,
-  // ): Promise<boolean> {
-  //   user.banInfo.isBanned = true;
-  //   user.banInfo.banReason = banReason;
-  //   user.banInfo.banDate = new Date();
-  //   return await this.commandRepo.banUserEntities(user._id, true);
-  // }
-  // private BannedBeforeAndBanedAfter(
-  //   user: UserDocument,
-  //   banReason: string,
-  // ): boolean {
-  //   if (user.banInfo.banReason === banReason) {
-  //     return false;
-  //   }
-  //   user.banInfo.banReason = banReason;
-  //   return true;
-  // }
-  // private async BannedBeforeAndNotBannedAfter(
-  //   user: UserDocument,
-  // ): Promise<boolean> {
-  //   user.banInfo.isBanned = false;
-  //   user.banInfo.banReason = null;
-  //   user.banInfo.banDate = null;
-  //   return await this.commandRepo.banUserEntities(user._id, false);
-  // }
+  private async NotBannedBeforeAndBanedAfter(
+    user: WithBanInfo<UserPresentationModel>,
+    banReason: string,
+  ): VoidPromise {
+    //@ts-ignore
+    return await this.commandRepo.banUser(+user.id, banReason);
+  }
+  private async BannedBeforeAndBanedAfter(
+    user: WithBanInfo<UserPresentationModel>,
+    banReason: string,
+  ): VoidPromise {
+    if (user.banInfo.banReason === banReason) {
+      return;
+    }
+    //@ts-ignore
+    await this.commandRepo.update;
+  }
+  private async BannedBeforeAndNotBannedAfter(
+    user: WithBanInfo<UserPresentationModel>,
+  ): VoidPromise {
+    user.banInfo.isBanned = false;
+    user.banInfo.banReason = null;
+    user.banInfo.banDate = null;
+    //@ts-ignore
+    return await this.commandRepo.banUserEntities(user._id, false);
+  }
 }
