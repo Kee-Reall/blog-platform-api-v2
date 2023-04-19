@@ -177,7 +177,7 @@ WHERE r.code = $1
       return await this.ds.query(
         `
 SELECT "lastIP" AS ip, title, "updateDate" AS "lastActiveDate",
-"deviceId"::VARCHAR FROM ${TablesENUM.SESSIONS} WHERE "userId" = $1
+"deviceId" FROM ${TablesENUM.SESSIONS} WHERE "userId" = $1
       `,
         [userId],
       );
