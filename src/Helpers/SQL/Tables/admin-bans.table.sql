@@ -12,5 +12,5 @@ CREATE TABLE public."AdminUsersBans"
         NOT VALID
 );
 
-ALTER TABLE IF EXISTS public."AdminBans"
+ALTER TABLE IF EXISTS public."AdminUsersBans"
     OWNER to nodejs;
