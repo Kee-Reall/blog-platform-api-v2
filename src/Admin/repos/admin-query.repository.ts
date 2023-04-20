@@ -1,6 +1,8 @@
 import { DataSource } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
+import { TablesENUM } from '../../Helpers/SQL';
+import { AbstractRepository } from '../../Base';
 import {
   DbRowMessage,
   Nullable,
@@ -9,8 +11,6 @@ import {
   UserStatus,
   WithBanInfo,
 } from '../../Model';
-import { TablesENUM } from '../../Helpers/SQL';
-import { AbstractRepository } from '../../Base';
 
 @Injectable()
 export class AdminQueryRepository extends AbstractRepository {
@@ -23,14 +23,6 @@ export class AdminQueryRepository extends AbstractRepository {
     email: string,
   ): Promise<DbRowMessage[]> {
     return await this.getUniqueUserError(this.ds, login, email);
-    //return this.ds.query(
-    // `
-    // SELECT 'login' AS field FROM ${TablesENUM.USERS} WHERE login = $1
-    // UNION
-    // SELECT 'email' AS field FROM ${TablesENUM.USERS} WHERE email = $2;
-    //     `,
-    //       [login, email],
-    //     );
   }
 
   public async getUserBeforeDelete(

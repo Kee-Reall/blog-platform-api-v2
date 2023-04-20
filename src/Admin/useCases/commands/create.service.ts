@@ -13,9 +13,9 @@ import {
 } from '../../../Model';
 
 export class CreateUser implements UserInputModel {
-  email: string;
-  login: string;
-  password: string;
+  public email: string;
+  public login: string;
+  public password: string;
 
   constructor(dto: UserInputModel) {
     this.email = dto.email;
@@ -30,6 +30,7 @@ export class CreateUserUseCase implements ICommandHandler<CreateUser> {
     private queryRepo: AdminQueryRepository,
     private commandRepo: AdminCommandRepository,
   ) {}
+
   public async execute(
     command: CreateUser,
   ): Promise<WithBanInfo<UserPresentationModel>> {

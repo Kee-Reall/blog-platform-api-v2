@@ -13,7 +13,6 @@ export class BasicAuthGuard implements CanActivate {
     if (!authorization) {
       throw new UnauthorizedException();
     }
-
     const auth: Array<unknown> = authorization.split(' ');
     if (!Array.isArray(auth)) {
       throw new UnauthorizedException();
