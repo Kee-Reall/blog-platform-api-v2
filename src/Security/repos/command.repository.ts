@@ -85,6 +85,7 @@ RETURNING "userId", "deviceId"::VARCHAR, "updateDate"
   ): Promise<CreationContract> {
     const queryRunner: QueryRunner = this.ds.createQueryRunner();
     const contract = new CreationContract();
+
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
@@ -97,6 +98,7 @@ RETURNING id
         [dto.login, dto.email, dto.hash],
       );
       const id: number = result[0].id;
+
       const [confirm, ban, recovery] = [
         `INSERT INTO ${TablesENUM.CONFIRMATIONS}("userId",status,date,code) VALUES ($1, false, $2,$3)`,
         `INSERT INTO ${TablesENUM.USERS_BAN_LIST_BY_ADMIN}("userId", status) VALUES ($1, false)`,
@@ -107,6 +109,7 @@ RETURNING id
         queryRunner.query(ban, [id]),
         queryRunner.query(recovery, [id]),
       ]);
+
       await queryRunner.commitTransaction();
       contract.setId(id);
       contract.setCode(dto.code);
