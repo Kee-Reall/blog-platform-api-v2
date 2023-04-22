@@ -18,6 +18,8 @@ export type BlogPresentationModel = Omit<BlogLogicModel, '_id'> & {
   createdAt: string;
 };
 
+export type BlogCreationModel = BlogInputModel & { userId: string | number };
+
 export type BlogOwnerInfoModel = {
   userId: number;
   userLogin: string;
