@@ -59,10 +59,10 @@ export class RegistrationUseCase implements ICommandHandler<Register> {
     }
     const isSent = await this.mailServ.sendConfirmation(
       command.email,
-      contract.getCode(),
+      contract.getPayloadCode(),
     );
     if (!isSent) {
-      await this.commandRepo.killUser(contract.getId());
+      await this.commandRepo.killUser(contract.getPayloadId());
       throw new ServiceUnavailableException();
     }
     return;

@@ -1,8 +1,8 @@
 import { ImATeapotException } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { CreationContract } from '../../../Base';
+import { Contract } from '../../../Base';
 import { BlogInputModel, BlogPresentationModel } from '../../../Model';
-import { BloggerQueryRepository, BloggerCommandRepository } from '../../repos';
+import { BloggerCommandRepository } from '../../repos';
 
 export class CreateBlog implements BlogInputModel {
   public description: string;
@@ -18,21 +18,17 @@ export class CreateBlog implements BlogInputModel {
 
 @CommandHandler(CreateBlog)
 export class CreateBlogUseCase implements ICommandHandler<CreateBlog> {
-  constructor(
-    private commandRepo: BloggerCommandRepository,
-    private queryRepo: BloggerQueryRepository,
-  ) {}
+  constructor(private commandRepo: BloggerCommandRepository) {}
 
   /* JwtGuard уже проверил и существования юзера и его статусы, поэтому тут это не требуется! */
   /* в случае замены REST презентационного слоя, убедится что он проверяет это */
   /* или добавить проверку здесь ! */
   public async execute(command: CreateBlog): Promise<BlogPresentationModel> {
-    const contract: CreationContract = await this.commandRepo.crateBlog(
-      command,
-    );
+    const contract: Contract<BlogPresentationModel> =
+      await this.commandRepo.crateBlog(command);
     if (contract.isFailed()) {
       throw new ImATeapotException();
     }
-    return await this.queryRepo.getBlogById(contract.getId());
+    return contract.getPayload();
   }
 }

@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { BlogCreationModel } from '../../Model';
-import { CreationContract } from '../../Base';
+import { BlogCreationModel, BlogPresentationModel } from '../../Model';
+import { Contract } from '../../Base';
 import { TablesENUM } from '../../Helpers/SQL';
 
 @Injectable()
@@ -11,9 +11,9 @@ export class BloggerCommandRepository {
 
   public async crateBlog(
     blogCreation: BlogCreationModel,
-  ): Promise<CreationContract> {
+  ): Promise<Contract<BlogPresentationModel>> {
     const queryRunner = this.ds.createQueryRunner();
-    const contract = new CreationContract();
+    const contract = new Contract<BlogPresentationModel>();
 
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -22,7 +22,7 @@ export class BloggerCommandRepository {
         `
 INSERT INTO ${TablesENUM.BLOGS}(name,description,"websiteUrl","ownerId")
 VALUES($1, $2, $3, $4)
-RETURNING *
+RETURNING id::VARCHAR, name, description, "websiteUrl", "createdAt", "isMembership"
       `,
         [
           blogCreation.name,
@@ -31,7 +31,8 @@ RETURNING *
           blogCreation.userId,
         ],
       );
-      const id: number = dbResult[0].id;
+      const blogPres = dbResult[0] as BlogPresentationModel;
+      const id: number = blogPres.id;
       await queryRunner.query(
         `
 INSERT INTO ${TablesENUM.BLOGS_BAN_LIST_BY_ADMIN}("blogId",date,status)
@@ -39,11 +40,10 @@ VALUES($1,NULL,false)
         `,
         [id],
       );
-      contract.setId(id);
+      contract.setPayload(blogPres);
       contract.setSuccess();
       await queryRunner.commitTransaction();
     } catch (e) {
-      console.log(e);
       contract.setFailed();
       await queryRunner.rollbackTransaction();
     } finally {
