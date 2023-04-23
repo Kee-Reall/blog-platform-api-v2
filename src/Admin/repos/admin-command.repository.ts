@@ -34,13 +34,14 @@ RETURNING id
       );
       await queryRunner.commitTransaction();
       contract.setId(id);
+      contract.setSuccess();
     } catch (e) {
       contract.setFailed();
       await queryRunner.rollbackTransaction();
     } finally {
       await queryRunner.release();
-      return contract;
     }
+    return contract;
   }
 
   public async deleteUser(userId: number) {

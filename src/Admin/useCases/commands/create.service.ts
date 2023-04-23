@@ -50,7 +50,7 @@ export class CreateUserUseCase implements ICommandHandler<CreateUser> {
     if (contract.isFailed()) {
       throw new ImATeapotException();
     }
-    return await this.queryRepo.getUser(contract.getId());
+    return await this.queryRepo.getUser(contract.getPayloadId());
   }
 
   private generateNotUniqueError(rows: DbRowMessage[]): {

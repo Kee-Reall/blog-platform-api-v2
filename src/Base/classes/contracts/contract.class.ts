@@ -3,28 +3,18 @@ import { Nullable } from '../../../Model';
 export class Contract<T> {
   protected payload: Nullable<T>;
   protected status: boolean;
-  protected statusHadBeenSet: boolean;
   protected code: number;
-  constructor(defaultStatus?: boolean) {
-    this.status = defaultStatus ? defaultStatus : false;
+  constructor(defaultStatus = false) {
+    this.status = defaultStatus;
     this.payload = null;
-    this.statusHadBeenSet = false;
   }
 
   public setSuccess() {
-    if (this.statusHadBeenSet) {
-      throw new Error('status already set');
-    }
-    this.statusHadBeenSet = true;
     this.status = true;
     this.code = 0;
   }
 
   public setFailed(code?: number) {
-    if (this.statusHadBeenSet) {
-      throw new Error('status already set');
-    }
-    this.statusHadBeenSet = true;
     this.status = false;
     if (code) {
       this.code = code;
@@ -32,16 +22,10 @@ export class Contract<T> {
   }
 
   public isSuccess(): boolean {
-    if (!this.statusHadBeenSet) {
-      throw new Error('status has not set');
-    }
     return this.status === true;
   }
 
   public isFailed(): boolean {
-    if (!this.statusHadBeenSet) {
-      throw new Error('status has not set');
-    }
     return this.status === false;
   }
 

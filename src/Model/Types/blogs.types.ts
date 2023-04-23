@@ -13,8 +13,8 @@ export type BlogLogicModel = {
   isMembership: boolean;
 };
 
-export type BlogPresentationModel = Omit<BlogLogicModel, '_id'> & {
-  id: string;
+export type BlogPresentationModel = Omit<BlogLogicModel, 'id' | '_id'> & {
+  id: string | number;
   createdAt: string;
 };
 

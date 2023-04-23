@@ -32,7 +32,7 @@ RETURNING id::VARCHAR, name, description, "websiteUrl", "createdAt", "isMembersh
         ],
       );
       const blogPres = dbResult[0] as BlogPresentationModel;
-      const id: number = blogPres.id;
+      const id: number = <number>blogPres.id;
       await queryRunner.query(
         `
 INSERT INTO ${TablesENUM.BLOGS_BAN_LIST_BY_ADMIN}("blogId",date,status)
@@ -44,11 +44,29 @@ VALUES($1,NULL,false)
       contract.setSuccess();
       await queryRunner.commitTransaction();
     } catch (e) {
+      console.log(e);
       contract.setFailed();
       await queryRunner.rollbackTransaction();
     } finally {
       await queryRunner.release();
-      return contract;
+    }
+    return contract;
+  }
+
+  public async deleteBlogByBlogId(id: string | number) {
+    try {
+      const dbQueryResult = await this.ds.query(
+        `
+UPDATE ${TablesENUM.BLOGS}
+SET "isDeleted" = true
+WHERE id = $1
+      `,
+        [id],
+      );
+      return dbQueryResult[1] === 1;
+    } catch (e) {
+      console.log(e);
+      return false;
     }
   }
 }

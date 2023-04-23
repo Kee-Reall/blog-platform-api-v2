@@ -1,15 +1,11 @@
-import {
-  ForbiddenException,
-  ImATeapotException,
-  NotFoundException,
-} from '@nestjs/common';
-import { VoidPromise } from '../../../Model';
-import { BloggerService } from './blogger.service';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { ForbiddenException, NotFoundException } from '@nestjs/common';
+import { BlogWithExtended, VoidPromise } from '../../../Model';
+import { BloggerService } from './blogger.service';
 import { BloggerCommandRepository, BloggerQueryRepository } from '../../repos';
 
 export class DeleteBlog {
-  constructor(public userId: string, public blogId: string) {}
+  constructor(public userId: number, public blogId: string) {}
 }
 
 @CommandHandler(DeleteBlog)
@@ -24,18 +20,22 @@ export class DeleteBlogUseCase
     super();
   }
   public async execute(command: DeleteBlog): VoidPromise {
-    // const blog = await this.queryRepo.getBlogEntity(command.blogId);
-    // if (!blog || blog._isBlogBanned) {
-    //   throw new NotFoundException();
-    // }
-    // if (!this.isOwner(command.userId, blog._blogOwnerInfo.userId)) {
-    //   throw new ForbiddenException();
-    // }
-    // const isDeleted = await this.commandRepo.deleteBlog(blog.id);
-    // if (!isDeleted) {
-    //   throw new ImATeapotException();
-    // }
-    // await this.commandRepo.deletePostsByBlogId(blog._id);
+    const blog: BlogWithExtended = await this.queryRepo.getBlogByIdWIthMeta(
+      command.blogId,
+    );
+    if (!blog) {
+      throw new NotFoundException();
+    }
+    const extended = blog.extendedInfo;
+    const isBanned = extended.isBlogBanned || extended.isOwnerBanned;
+    const isDeleted = extended.isOwnerDeleted || extended.isDeleted;
+    if (isBanned || isDeleted) {
+      throw new NotFoundException();
+    }
+    if (extended.ownerId !== command.userId) {
+      throw new ForbiddenException();
+    }
+    await this.commandRepo.deleteBlogByBlogId(blog.id);
     return;
   }
 }

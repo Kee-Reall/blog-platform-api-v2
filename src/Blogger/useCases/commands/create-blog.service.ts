@@ -27,6 +27,7 @@ export class CreateBlogUseCase implements ICommandHandler<CreateBlog> {
     const contract: Contract<BlogPresentationModel> =
       await this.commandRepo.crateBlog(command);
     if (contract.isFailed()) {
+      console.log(contract);
       throw new ImATeapotException();
     }
     return contract.getPayload();

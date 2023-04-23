@@ -1,5 +1,5 @@
-import { Nullable } from './helpers.types';
 import { SessionJwtMeta } from './auth.metadata.types';
+import { BlogPresentationModel } from './blogs.types';
 
 export type DbRowMessage = { field: string };
 export interface OperationResult<Payload = any> {
@@ -23,3 +23,13 @@ export interface UserStatus {
   isBanned: boolean;
   isConfirmed: boolean;
 }
+
+export type BlogWithExtended = BlogPresentationModel & {
+  extendedInfo: {
+    ownerId: number;
+    isOwnerDeleted: boolean;
+    isBlogBanned: boolean;
+    isOwnerBanned: boolean;
+    isDeleted: boolean;
+  };
+};

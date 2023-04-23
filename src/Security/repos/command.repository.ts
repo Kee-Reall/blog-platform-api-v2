@@ -113,21 +113,23 @@ RETURNING id
       await queryRunner.commitTransaction();
       contract.setId(id);
       contract.setCode(dto.code);
+      contract.setSuccess();
     } catch (e) {
       contract.setFailed();
       await queryRunner.rollbackTransaction();
     } finally {
       await queryRunner.release();
-      return contract;
     }
+    return contract;
   }
 
   public async killUser(id: number): VoidPromise {
     try {
       await this.ds.query(`DELETE FROM ${TablesENUM.USERS} WHERE id=$1`, [id]);
-    } finally {
-      return;
+    } catch (e) {
+      console.log(e);
     }
+    return;
   }
 
   public async updateConfirmationCode(
@@ -189,9 +191,8 @@ WHERE "userId" = (
       );
     } catch (e) {
       console.log(e);
-    } finally {
-      return;
     }
+    return;
   }
 
   public async setNewPassword(userId: number, hash: string): Promise<boolean> {
@@ -225,8 +226,8 @@ WHERE "userId" = $1
       console.log(e);
     } finally {
       await queryRunner.release();
-      return isSuccess;
     }
+    return isSuccess;
   }
 
   public async killAllSessionsExcludeCurrent(
@@ -242,8 +243,7 @@ DELETE FROM ${TablesENUM.SESSIONS} WHERE "userId" = $1 AND "deviceId" != $2
       );
     } catch (e) {
       console.log(e);
-    } finally {
-      return;
     }
+    return;
   }
 }
