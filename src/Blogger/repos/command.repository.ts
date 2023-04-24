@@ -1,7 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { BlogCreationModel, BlogPresentationModel } from '../../Model';
+import {
+  BlogCreationModel,
+  BlogInputModel,
+  BlogPresentationModel,
+} from '../../Model';
 import { Contract } from '../../Base';
 import { TablesENUM } from '../../Helpers/SQL';
 
@@ -69,4 +73,6 @@ WHERE id = $1
       return false;
     }
   }
+
+  public async updateBlog(id: string | number, input: BlogInputModel) {}
 }

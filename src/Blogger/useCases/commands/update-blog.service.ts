@@ -1,7 +1,8 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { BlogInputModel, VoidPromise } from '../../../Model';
+import { BlogInputModel, BlogWithExtended, VoidPromise } from '../../../Model';
 import { BloggerCommandRepository, BloggerQueryRepository } from '../../repos';
 import { BloggerService } from './blogger.service';
+import { ForbiddenException, NotFoundException } from '@nestjs/common';
 
 export class UpdateBlog implements BlogInputModel {
   description: string;
@@ -9,16 +10,19 @@ export class UpdateBlog implements BlogInputModel {
   name: string;
   websiteUrl: string;
   planedDto: string;
+  public userId: number;
+  public blogId: number;
   constructor(
-    public userId: string,
-    public blogId: string,
+    userId: string,
+    blogId: string,
 
     dto: BlogInputModel,
   ) {
     this.description = dto.description;
     this.websiteUrl = dto.websiteUrl;
     this.name = dto.name;
-    this.planedDto = JSON.stringify(dto);
+    this.blogId = +blogId;
+    this.userId = +userId;
   }
 }
 
@@ -34,6 +38,24 @@ export class UpdateBlogUseCase
     super();
   }
   public async execute(command: UpdateBlog): VoidPromise {
+    const blog: BlogWithExtended = await this.queryRepo.getBlogByIdWIthMeta(
+      command.blogId,
+    );
+    if (!blog) {
+      throw new NotFoundException();
+    }
+    const extended = blog.extendedInfo;
+    const isBanned = extended.isBlogBanned || extended.isOwnerBanned;
+    const isDeleted = extended.isOwnerDeleted || extended.isDeleted;
+    if (isBanned || isDeleted) {
+      throw new NotFoundException();
+    }
+    if (extended.ownerId !== command.userId) {
+      throw new ForbiddenException();
+    }
+    console.log('should update');
+    await this.commandRepo.updateBlog(blog.id, <BlogInputModel>command); //todo write this
+    return;
     // const blog = await this.queryRepo.getBlogEntity(command.blogId);
     // if (!blog || blog._isBlogBanned) {
     //   throw new NotFoundException();
