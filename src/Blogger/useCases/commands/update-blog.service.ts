@@ -2,18 +2,21 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { BlogInputModel, BlogWithExtended, VoidPromise } from '../../../Model';
 import { BloggerCommandRepository, BloggerQueryRepository } from '../../repos';
 import { BloggerService } from './blogger.service';
-import { ForbiddenException, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  ImATeapotException,
+  NotFoundException,
+} from '@nestjs/common';
 
 export class UpdateBlog implements BlogInputModel {
   description: string;
 
   name: string;
   websiteUrl: string;
-  planedDto: string;
   public userId: number;
   public blogId: number;
   constructor(
-    userId: string,
+    userId: string | number,
     blogId: string,
 
     dto: BlogInputModel,
@@ -53,37 +56,13 @@ export class UpdateBlogUseCase
     if (extended.ownerId !== command.userId) {
       throw new ForbiddenException();
     }
-    console.log('should update');
-    await this.commandRepo.updateBlog(blog.id, <BlogInputModel>command); //todo write this
+    const updated = await this.commandRepo.updateBlog(
+      blog.id,
+      <BlogInputModel>command,
+    );
+    if (!updated) {
+      throw new ImATeapotException();
+    }
     return;
-    // const blog = await this.queryRepo.getBlogEntity(command.blogId);
-    // if (!blog || blog._isBlogBanned) {
-    //   throw new NotFoundException();
-    // }
-    // if (!this.isOwner(command.userId, blog._blogOwnerInfo.userId)) {
-    //   throw new ForbiddenException();
-    // }
-    // const isSaved: boolean = await this.commandRepo.saveBlog(blog);
-    // if (!isSaved) {
-    //   throw new ImATeapotException();
-    // }
-    // const after: BlogInputModel = {
-    //   description: blog.description,
-    //   websiteUrl: blog.websiteUrl,
-    //   name: blog.name,
-    // };
-    // if (this.shouldSave(command.planedDto, after)) {
-    //   blog.description = command.description;
-    //   blog.websiteUrl = command.websiteUrl;
-    //   blog.name = command.name;
-    //   if (!(await this.commandRepo.saveBlog(blog))) {
-    //     throw new ImATeapotException();
-    //   }
-    // }
-    return;
-  }
-
-  private shouldSave(planedDto: string, after: BlogInputModel): boolean {
-    return planedDto !== JSON.stringify(after);
   }
 }

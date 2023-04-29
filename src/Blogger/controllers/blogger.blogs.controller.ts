@@ -79,9 +79,9 @@ export class BloggerBlogsController {
     @Meta() tknMeta: AccessTokenMeta,
     @Body() dto: BlogInput,
   ): VoidPromise {
-    // return await this.commandBus.execute(
-    //   new bloggerCommands.UpdateBlog(tknMeta.userId, blogId, dto),
-    // );
+    return await this.commandBus.execute(
+      new bloggerCommands.UpdateBlog(tknMeta.userId, blogId, dto),
+    );
   }
 
   @Put(':blogId/posts/:postId')

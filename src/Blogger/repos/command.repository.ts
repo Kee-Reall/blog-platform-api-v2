@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
 import {
@@ -12,6 +12,8 @@ import { TablesENUM } from '../../Helpers/SQL';
 @Injectable()
 export class BloggerCommandRepository {
   constructor(@InjectDataSource() private ds: DataSource) {}
+
+  private logger = new Logger();
 
   public async crateBlog(
     blogCreation: BlogCreationModel,
@@ -74,5 +76,20 @@ WHERE id = $1
     }
   }
 
-  public async updateBlog(id: string | number, input: BlogInputModel) {}
+  public async updateBlog(id: string | number, input: BlogInputModel) {
+    try {
+      const dbQueryResult = await this.ds.query(
+        `
+UPDATE ${TablesENUM.BLOGS}
+SET name = $1 , description = $2, "websiteUrl" = $3
+WHERE id = $4
+      `,
+        [input.name, input.description, input.websiteUrl, id],
+      );
+      return dbQueryResult[1] === 1;
+    } catch (e) {
+      this.logger.error(e);
+      return false;
+    }
+  }
 }

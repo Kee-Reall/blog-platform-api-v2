@@ -34,7 +34,6 @@ WHERE u.id = $1 AND c.status = true
       `,
       [userId],
     );
-    console.log(result);
     if (result.length < 0) {
       throw new UnauthorizedException();
     }

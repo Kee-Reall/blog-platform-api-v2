@@ -41,9 +41,6 @@ export class Contract<T> {
   }
 
   public isCode(code: number): boolean {
-    if (isNaN(code)) {
-      throw new Error('code should be a number');
-    }
     return this.code === code;
   }
 }
