@@ -15,11 +15,13 @@ import {
 import { JwtGuard, Meta } from '../../Base';
 import { BlogInput, PostInput } from '../validators';
 import { bloggerCommands, bloggerQueries } from '../useCases';
+import { BlogsForBloggerPaginationPipe } from '../pipes/blogsPagination.pipe';
 import {
   AccessTokenMeta,
   BlogFilter,
   BlogPresentationModel,
   CommentsFilter,
+  IBlogPaginationConfig,
   PaginatedOutput,
   PostPresentationModel,
   VoidPromise,
@@ -33,12 +35,11 @@ export class BloggerBlogsController {
   @Get()
   public async getBlogsForOwner(
     @Meta() user: AccessTokenMeta,
-    @Query() filters: BlogFilter,
+    @Query(BlogsForBloggerPaginationPipe) filters: IBlogPaginationConfig,
   ): Promise<PaginatedOutput<BlogPresentationModel>> {
-    // return await this.queryBus.execute(
-    //   new bloggerQueries.GetPaginatedBlogs(user.userId, filters),
-    // );
-    return;
+    return await this.queryBus.execute(
+      new bloggerQueries.GetPaginatedBlogs(user.userId, filters),
+    );
   }
 
   @Get('comments')

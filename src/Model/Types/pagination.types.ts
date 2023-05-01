@@ -15,6 +15,10 @@ export interface IUserPaginationConfig extends IPaginationConfig {
   banStatus: Nullable<boolean>;
 }
 
+export interface IBlogPaginationConfig extends IPaginationConfig {
+  searchNameTerm: string;
+}
+
 export type PaginatedOutput<Data> = {
   pagesCount: number;
   page: number;

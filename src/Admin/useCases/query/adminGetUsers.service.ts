@@ -9,22 +9,17 @@ import {
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { TablesENUM } from '../../../Helpers/SQL';
+import { PaginateQuery } from '../../../Base/classes/commands/paginate.query';
 
-export class GetPaginatedUsers implements IUserPaginationConfig {
-  public sortBy;
-  public shouldSkip;
-  public limit;
-  public sortDirection;
-  public pageNumber;
+export class GetPaginatedUsers
+  extends PaginateQuery
+  implements IUserPaginationConfig
+{
   public login;
   public email;
   public banStatus;
   constructor(input: IUserPaginationConfig) {
-    this.sortBy = input.sortBy;
-    this.shouldSkip = input.shouldSkip;
-    this.limit = input.limit;
-    this.sortDirection = input.sortDirection;
-    this.pageNumber = input.pageNumber;
+    super(input);
     this.login = input.login;
     this.email = input.email;
     this.banStatus = input.banStatus;
