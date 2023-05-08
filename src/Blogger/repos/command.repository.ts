@@ -8,12 +8,13 @@ import {
 } from '../../Model';
 import { Contract } from '../../Base';
 import { TablesENUM } from '../../Helpers/SQL';
+import { CreatePost } from '../useCases/commands/create-post.service';
 
 @Injectable()
 export class BloggerCommandRepository {
   constructor(@InjectDataSource() private ds: DataSource) {}
 
-  private logger = new Logger();
+  private logger = new Logger(this.constructor.name);
 
   public async crateBlog(
     blogCreation: BlogCreationModel,
@@ -91,5 +92,28 @@ WHERE id = $4
       this.logger.error(e);
       return false;
     }
+  }
+
+  public async createPost(command: CreatePost): Promise<Contract<string>> {
+    const contract = new Contract<string>();
+    try {
+      const { title, shortDescription, content, blogId, userId } = command;
+      const dbQueryResult = await this.ds.query(
+        `
+INSERT INTO ${TablesENUM.POSTS}
+("ownerId", "blogId", content, "shortDescription", title)
+VALUES($1,$2,$3,$4,$5)
+RETURNING id::VARCHAR
+      `,
+        [userId, blogId, content, shortDescription, title],
+      );
+      const rawPost = dbQueryResult[0];
+      contract.setPayload(rawPost.id);
+      contract.setSuccess();
+    } catch (e) {
+      this.logger.error(e, e.stack);
+      contract.setFailed();
+    }
+    return contract;
   }
 }

@@ -2,10 +2,17 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { BloggerService } from './blogger.service';
 import { BloggerCommandRepository, BloggerQueryRepository } from '../../repos';
 import {
+  BlogWithExtended,
   PostInputModel,
   PostPresentationModel,
   WithExtendedLike,
 } from '../../../Model';
+import {
+  ForbiddenException,
+  ImATeapotException,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 
 export class CreatePost implements PostInputModel {
   public content: string;
@@ -28,6 +35,7 @@ export class CreatePostUseCase
   extends BloggerService
   implements ICommandHandler<CreatePost>
 {
+  private logger = new Logger(this.constructor.name);
   constructor(
     private queryRepo: BloggerQueryRepository,
     private commandRepo: BloggerCommandRepository,
@@ -37,40 +45,31 @@ export class CreatePostUseCase
   public async execute(
     command: CreatePost,
   ): Promise<WithExtendedLike<PostPresentationModel>> {
-    // const blog = await this.queryRepo.getBlogEntity(command.blogId);
-    // if (!blog || blog._isBlogBanned) {
-    //   throw new NotFoundException();
-    // }
-    // if (!this.isOwner(command.userId, blog._blogOwnerInfo.userId)) {
-    //   throw new ForbiddenException();
-    // }
-    // const post = new this.mdl({
-    //   content: command.content,
-    //   shortDescription: command.shortDescription,
-    //   title: command.title,
-    //   blogId: blog._id,
-    //   blogName: blog.name,
-    //   _ownerId: blog._blogOwnerInfo.userId,
-    // });
-    // const isSaved: boolean = await this.commandRepo.savePost(post);
-    // if (!isSaved) {
-    //   throw new ImATeapotException();
-    // }
-    // return {
-    //   ...(post.toJSON() as PostPresentationModel),
-    //   ...this.defaultLikeInfo(),
-    // };
-    return;
-  }
-
-  private defaultLikeInfo(): WithExtendedLike<object> {
-    return {
-      extendedLikesInfo: {
-        likesCount: 0,
-        dislikesCount: 0,
-        myStatus: 'None',
-        newestLikes: [],
-      },
-    };
+    const blog: BlogWithExtended = await this.queryRepo.getBlogByIdWIthMeta(
+      command.blogId,
+    );
+    if (!blog) {
+      throw new NotFoundException();
+    }
+    const extended = blog.extendedInfo;
+    const isBanned = extended.isBlogBanned || extended.isOwnerBanned;
+    const isDeleted = extended.isOwnerDeleted || extended.isDeleted;
+    if (isBanned || isDeleted) {
+      throw new NotFoundException();
+    }
+    if (extended.ownerId.toString() !== command.userId) {
+      throw new ForbiddenException();
+    }
+    const contract = await this.commandRepo.createPost(command);
+    if (contract.isFailed()) {
+      this.logger.debug('while saving');
+      throw new ImATeapotException();
+    }
+    const post = await this.queryRepo.getPost(contract.getPayload());
+    if (post.isFailed()) {
+      this.logger.debug('while getting');
+      throw new ImATeapotException();
+    }
+    return post.getPayload();
   }
 }

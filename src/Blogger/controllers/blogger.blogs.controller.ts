@@ -18,7 +18,6 @@ import { bloggerCommands, bloggerQueries } from '../useCases';
 import { BlogsForBloggerPaginationPipe } from '../pipes/blogsPagination.pipe';
 import {
   AccessTokenMeta,
-  BlogFilter,
   BlogPresentationModel,
   CommentsFilter,
   IBlogPaginationConfig,
@@ -67,10 +66,9 @@ export class BloggerBlogsController {
     @Meta() tknMeta: AccessTokenMeta,
     @Body() dto: PostInput,
   ): Promise<WithExtendedLike<PostPresentationModel>> {
-    // return await this.commandBus.execute(
-    //   new bloggerCommands.CreatePost(tknMeta.userId, blogId, dto),
-    // );
-    return;
+    return await this.commandBus.execute(
+      new bloggerCommands.CreatePost(tknMeta.userId.toString(), blogId, dto),
+    );
   }
 
   @Put(':id')

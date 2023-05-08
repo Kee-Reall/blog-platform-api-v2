@@ -2,7 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { TablesENUM } from '../../Helpers/SQL';
-import { BlogPresentationModel, BlogWithExtended } from '../../Model';
+import {
+  BlogPresentationModel,
+  BlogWithExtended,
+  PostPresentationModel,
+  WithExtendedLike,
+} from '../../Model';
+import { Contract } from '../../Base';
 
 @Injectable()
 export class BloggerQueryRepository {
@@ -62,8 +68,44 @@ WHERE b.id = $1
       };
       return blog;
     } catch (e) {
-      console.log(e);
       return null;
     }
+  }
+
+  public async getPost(postId: string) {
+    const contract = new Contract<WithExtendedLike<PostPresentationModel>>();
+    try {
+      const dbQueryResult = await this.ds.query(
+        `
+SELECT p.id::VARCHAR, p.title, p."shortDescription", p.content, p."createdAt",
+b.id::VARCHAR AS "blogId", b.name AS "blogName"
+FROM ${TablesENUM.POSTS} AS p
+JOIN ${TablesENUM.BLOGS} AS b
+ON p."blogId" = b.id
+WHERE p.id = $1
+      `,
+        [postId],
+      );
+      const raw = dbQueryResult[0];
+      contract.setPayload({ ...raw, ...this.getDefaultExtendedLike() });
+      contract.setSuccess();
+    } catch (e) {
+      contract.setFailed();
+    }
+    return contract;
+  }
+
+  private getDefaultExtendedLike(): Pick<
+    WithExtendedLike<unknown>,
+    'extendedLikesInfo'
+  > {
+    return {
+      extendedLikesInfo: {
+        likesCount: 0,
+        dislikesCount: 0,
+        myStatus: 'None',
+        newestLikes: [],
+      },
+    };
   }
 }

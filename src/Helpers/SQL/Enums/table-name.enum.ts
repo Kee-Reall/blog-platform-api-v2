@@ -1,4 +1,5 @@
 export enum TablesENUM {
+  POSTS = `"Posts"`,
   USERS = `"Users"`,
   CONFIRMATIONS = `"Confirmation"`,
   RECOVERIES_INFO = `"UsersRecovery"`,
