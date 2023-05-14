@@ -9,7 +9,7 @@ export class UpdatePost implements PostInputModel {
   title: string;
 
   constructor(
-    public userId: string,
+    public userId: string | number,
     public blogId: string,
     public postId: string,
     dto: PostInputModel,
@@ -32,6 +32,7 @@ export class UpdatePostUseCase
     super();
   }
   public async execute(command: UpdatePost): VoidPromise {
+    const post = await this.queryRepo.getPostByIdWIthMeta(command.postId);
     // const post = await this.checkEntitiesThenGetPost(command, this.queryRepo);
     // post.title = command.title;
     // post.content = command.content;

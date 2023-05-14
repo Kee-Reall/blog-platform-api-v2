@@ -1,5 +1,6 @@
 import { SessionJwtMeta } from './auth.metadata.types';
 import { BlogPresentationModel } from './blogs.types';
+import { PostPresentationModel } from './posts.types';
 
 export type DbRowMessage = { field: string };
 export interface OperationResult<Payload = any> {
@@ -24,12 +25,18 @@ export interface UserStatus {
   isConfirmed: boolean;
 }
 
+export type ExtendedInfo = {
+  ownerId: number;
+  isOwnerDeleted: boolean;
+  isBlogBanned: boolean;
+  isOwnerBanned: boolean;
+  isDeleted: boolean;
+};
+
 export type BlogWithExtended = BlogPresentationModel & {
-  extendedInfo: {
-    ownerId: number;
-    isOwnerDeleted: boolean;
-    isBlogBanned: boolean;
-    isOwnerBanned: boolean;
-    isDeleted: boolean;
-  };
+  extendedInfo: ExtendedInfo;
+};
+
+export type PostWithExtended = Omit<PostPresentationModel, 'blogName'> & {
+  extendedInfo: ExtendedInfo & { isBlogDeleted: boolean };
 };

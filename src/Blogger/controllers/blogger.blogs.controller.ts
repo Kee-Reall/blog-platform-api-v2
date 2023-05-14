@@ -91,9 +91,9 @@ export class BloggerBlogsController {
     @Meta() tknMeta: AccessTokenMeta,
     @Body() dto: PostInput,
   ): VoidPromise {
-    // return await this.commandBus.execute(
-    //   new bloggerCommands.UpdatePost(tknMeta.userId, blogId, postId, dto),
-    // );
+    return await this.commandBus.execute(
+      new bloggerCommands.UpdatePost(tknMeta.userId, blogId, postId, dto),
+    );
   }
 
   @Delete(':id')

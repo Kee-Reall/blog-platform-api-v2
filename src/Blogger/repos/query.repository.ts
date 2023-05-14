@@ -1,24 +1,26 @@
-import { Injectable } from '@nestjs/common';
-import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
+import { Injectable, Logger } from '@nestjs/common';
+import { InjectDataSource } from '@nestjs/typeorm';
 import { TablesENUM } from '../../Helpers/SQL';
+import { Contract } from '../../Base';
 import {
   BlogPresentationModel,
   BlogWithExtended,
   PostPresentationModel,
   WithExtendedLike,
 } from '../../Model';
-import { Contract } from '../../Base';
 
 @Injectable()
 export class BloggerQueryRepository {
-  constructor(@InjectDataSource() private ds: DataSource) {}
+  private readonly logger = new Logger(this.constructor.name);
+  constructor(@InjectDataSource() private readonly ds: DataSource) {}
 
   public async getBlogById(id: number): Promise<BlogPresentationModel> {
     try {
       const queryResult = await this.ds.query(
         `
-SELECT * FROM ${TablesENUM.BLOGS}
+SELECT * 
+FROM ${TablesENUM.BLOGS}
 WHERE id = $1
       `,
         [id],
@@ -30,7 +32,9 @@ WHERE id = $1
     }
   }
 
-  public async getBlogByIdWIthMeta(id: number | string) {
+  public async getBlogByIdWIthMeta(
+    id: number | string,
+  ): Promise<BlogWithExtended> {
     try {
       const queryResult = await this.ds.query(
         `
@@ -107,5 +111,32 @@ WHERE p.id = $1
         newestLikes: [],
       },
     };
+  }
+
+  public async getPostByIdWIthMeta(postId: string | number) {
+    try {
+      const [raw] = await this.ds.query(
+        `
+SELECT p.*, b."isDeleted" AS "isBlogDeleted",
+aub.status as "isOwnerBanned",abb.status as "isBlogBanned",
+u."isDeleted" as "isOwnerDeleted"
+FROM ${TablesENUM.POSTS} AS p
+JOIN ${TablesENUM.BLOGS} AS b
+ON b.id = p."blogId"
+JOIN ${TablesENUM.USERS} as u
+ON p."ownerId" = u.id
+JOIN ${TablesENUM.USERS_BAN_LIST_BY_ADMIN} AS aub
+ON aub."userId" = p."ownerId"
+JOIN ${TablesENUM.BLOGS_BAN_LIST_BY_ADMIN} AS abb
+ON abb."blogId" = p."blogId"
+WHERE p.id = $1
+    `,
+        [postId],
+      );
+      this.logger.debug(raw);
+      return;
+    } catch (e) {
+      this.logger.debug(e, e.stack);
+    }
   }
 }
