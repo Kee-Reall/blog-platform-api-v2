@@ -5,6 +5,7 @@ import {
   BlogCreationModel,
   BlogInputModel,
   BlogPresentationModel,
+  PostInputModel,
 } from '../../Model';
 import { Contract } from '../../Base';
 import { TablesENUM } from '../../Helpers/SQL';
@@ -115,5 +116,38 @@ RETURNING id::VARCHAR
       contract.setFailed();
     }
     return contract;
+  }
+
+  public async updatePost(id: number, dto: PostInputModel): Promise<boolean> {
+    try {
+      const { shortDescription, title, content } = dto;
+      const [_, updatedQuality] = await this.ds.query(
+        `
+UPDATE ${TablesENUM.POSTS}
+SET "shortDescription" = $1, title = $2, content = $3
+WHERE id = $4
+      `,
+        [shortDescription, title, content, id],
+      );
+      return updatedQuality > 0;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  public async deletePost(id: number): Promise<boolean> {
+    try {
+      const [_, updatedQuality] = await this.ds.query(
+        `
+UPDATE ${TablesENUM.POSTS}
+SET "isDeleted" = TRUE
+WHERE id = $1
+        `,
+        [id],
+      );
+      return updatedQuality > 0;
+    } catch (e) {
+      return false;
+    }
   }
 }

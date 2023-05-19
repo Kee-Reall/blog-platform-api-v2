@@ -114,8 +114,8 @@ export class BloggerBlogsController {
     @Param('postId') postId: string,
     @Meta() tknMeta: AccessTokenMeta,
   ): VoidPromise {
-    // return await this.commandBus.execute(
-    //   new bloggerCommands.DeletePost(tknMeta.userId, blogId, postId),
-    // );
+    return await this.commandBus.execute(
+      new bloggerCommands.DeletePost(tknMeta.userId, blogId, postId),
+    );
   }
 }

@@ -1,11 +1,16 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { ImATeapotException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  ImATeapotException,
+  NotFoundException,
+} from '@nestjs/common';
 import { BloggerService } from './blogger.service';
 import { BloggerCommandRepository, BloggerQueryRepository } from '../../repos';
+import { isNil } from '@nestjs/common/utils/shared.utils';
 
 export class DeletePost {
   constructor(
-    public userId: string,
+    public userId: string | number,
     public blogId: string,
     public postId: string,
   ) {}
@@ -24,10 +29,27 @@ export class DeletePostUseCase
   }
 
   public async execute(command: DeletePost) {
-    // const post = await this.checkEntitiesThenGetPost(command, this.queryRepo);
-    // const isDeleted = await this.commandRepo.deletePost(post.id);
-    // if (!isDeleted) {
-    //   throw new ImATeapotException();
-    // }
+    const post = await this.queryRepo.getPostByIdWIthMeta(command.postId);
+    if (isNil(post)) {
+      throw new NotFoundException();
+    }
+    if ((post.blogId as number).toString() !== command.blogId) {
+      throw new NotFoundException();
+    }
+    const extended = post.extendedInfo;
+    const isBanned = extended.isBlogBanned || extended.isBlogBanned;
+    const isDeleted =
+      extended.isDeleted || extended.isBlogDeleted || extended.isOwnerDeleted;
+    if (isBanned || isDeleted) {
+      throw new NotFoundException();
+    }
+    if (command.userId !== extended.ownerId) {
+      throw new ForbiddenException();
+    }
+    const isSuccess = await this.commandRepo.deletePost(+command.postId);
+    if (!isSuccess) {
+      throw new ImATeapotException();
+    }
+    return;
   }
 }

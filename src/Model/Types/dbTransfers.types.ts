@@ -38,5 +38,7 @@ export type BlogWithExtended = BlogPresentationModel & {
 };
 
 export type PostWithExtended = Omit<PostPresentationModel, 'blogName'> & {
+  id: number;
+  blogId: number;
   extendedInfo: ExtendedInfo & { isBlogDeleted: boolean };
 };

@@ -6,9 +6,12 @@ import { Contract } from '../../Base';
 import {
   BlogPresentationModel,
   BlogWithExtended,
+  NullablePromise,
   PostPresentationModel,
+  PostWithExtended,
   WithExtendedLike,
 } from '../../Model';
+import { isUndefined } from '@nestjs/common/utils/shared.utils';
 
 @Injectable()
 export class BloggerQueryRepository {
@@ -113,7 +116,9 @@ WHERE p.id = $1
     };
   }
 
-  public async getPostByIdWIthMeta(postId: string | number) {
+  public async getPostByIdWIthMeta(
+    postId: string | number,
+  ): NullablePromise<PostWithExtended> {
     try {
       const [raw] = await this.ds.query(
         `
@@ -134,9 +139,27 @@ WHERE p.id = $1
         [postId],
       );
       this.logger.debug(raw);
-      return;
+      if (isUndefined(raw)) {
+        return null;
+      }
+      return {
+        id: raw.id as number,
+        blogId: raw.blogId as number,
+        content: raw.content,
+        shortDescription: raw.shortDescription,
+        title: raw.title,
+        createdAt: raw.createdAt,
+        extendedInfo: {
+          isDeleted: raw.isDeleted,
+          ownerId: raw.ownerId,
+          isOwnerDeleted: raw.isOwnerDeleted,
+          isOwnerBanned: raw.isOwnerBanned,
+          isBlogBanned: raw.isBlogBanned,
+          isBlogDeleted: raw.isBlogDeleted,
+        },
+      } as PostWithExtended;
     } catch (e) {
-      this.logger.debug(e, e.stack);
+      return null;
     }
   }
 }
