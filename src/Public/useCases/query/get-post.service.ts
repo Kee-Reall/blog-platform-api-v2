@@ -21,10 +21,11 @@ export class GetPostUseCase implements IQueryHandler<GetPost> {
   public async execute(
     query: GetPost,
   ): Promise<WithExtendedLike<PostPresentationModel>> {
-    const post = await this.repo.getPostEntity(query.postId);
-    if (!post || post._isOwnerBanned || post._isBlogBanned) {
-      throw new NotFoundException();
-    }
-    return await this.repo.getExtendedLikeInfo(post, query.userId);
+    // const post = await this.repo.getPostEntity(query.postId);
+    // if (!post || post._isOwnerBanned || post._isBlogBanned) {
+    //   throw new NotFoundException();
+    // }
+    // return await this.repo.getExtendedLikeInfo(post, query.userId);
+    return null;
   }
 }

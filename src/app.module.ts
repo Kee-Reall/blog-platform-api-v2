@@ -7,6 +7,7 @@ import { AdminModule } from './Admin/admin.module';
 import { TestingModule } from './Testing/testing.module';
 import { BloggerModule } from './Blogger/blogger.module';
 import { SecurityModule } from './Security/security.module';
+import { PublicModule } from './Public/public.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { SecurityModule } from './Security/security.module';
     SecurityModule,
     AdminModule,
     BloggerModule,
+    PublicModule,
   ],
 })
 export class AppModule {}

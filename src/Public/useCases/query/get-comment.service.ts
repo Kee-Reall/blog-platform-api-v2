@@ -12,6 +12,7 @@ export class GetCommentUseCase implements IQueryHandler<GetComment> {
   public async execute(
     query: GetComment,
   ): Promise<WithLike<CommentPresentationModel>> {
-    return await this.repo.getCommentWithLike(query.commentId, query.userId);
+    //return await this.repo.getCommentWithLike(query.commentId, query.userId);
+    return null;
   }
 }

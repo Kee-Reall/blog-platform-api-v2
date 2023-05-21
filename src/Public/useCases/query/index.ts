@@ -7,16 +7,16 @@ import {
   GetPostsByBlog,
   GetPostsByBlogsUseCase,
 } from './get-posts-by-blog.service';
-import {
-  GetComments,
-  GetCommentsUseCase,
-} from './get-comments-by-post.service';
+// import {
+//   GetComments,
+//   GetCommentsUseCase,
+// } from './get-comments-by-post.service';
 
 export const query = {
   GetBlog,
   GetBlogs,
   GetComment,
-  GetComments,
+  //GetComments,
   GetPostsByBlog,
   GetPost,
   GetPosts,
@@ -25,7 +25,7 @@ export const query = {
 export const queryUseCases = [
   GetBlogUseCase,
   GetCommentUseCase,
-  GetCommentsUseCase,
+  //GetCommentsUseCase,
   GetPaginatedBlogsUseCase,
   GetPostsByBlogsUseCase,
   GetPostUseCase,

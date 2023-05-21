@@ -12,7 +12,7 @@ import {
   WithExtendedLike,
 } from '../../Model';
 
-@Controller('api/blogs')
+@Controller('blogs')
 export class BlogsController {
   constructor(private bus: QueryBus) {}
   @Get()
@@ -25,6 +25,7 @@ export class BlogsController {
   public async getBlogById(
     @Param('id') blogId: string,
   ): Promise<BlogPresentationModel> {
+    console.log('work');
     return await this.bus.execute(new query.GetBlog(blogId));
   }
   @Get(':id/posts')
