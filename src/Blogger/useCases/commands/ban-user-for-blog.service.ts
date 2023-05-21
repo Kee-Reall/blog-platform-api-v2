@@ -9,7 +9,7 @@ export class BanUserForBlog implements BanUserForBlogInputModel {
   public isBanned: boolean;
 
   constructor(
-    public ownerId: string,
+    public ownerId: string | number,
     public userId: string,
     dto: BanUserForBlogInputModel,
   ) {

@@ -162,4 +162,8 @@ WHERE p.id = $1
       return null;
     }
   }
+
+  public async getUserBan(userId: number, blogId: number) {
+    return;
+  }
 }
