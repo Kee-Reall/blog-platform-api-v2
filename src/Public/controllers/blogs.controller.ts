@@ -5,20 +5,23 @@ import { Meta, SoftJwtGuard } from '../../Base';
 import {
   BlogFilter,
   BlogPresentationModel,
+  IBlogPaginationConfig,
   PaginatedOutput,
   PostFilter,
   PostPresentationModel,
   SoftGuardMeta,
   WithExtendedLike,
 } from '../../Model';
+import { PublicBlogsPaginationPipe } from '../pipes/public-blogs.pagination.pipe';
 
 @Controller('blogs')
 export class BlogsController {
   constructor(private bus: QueryBus) {}
   @Get()
   public async getBlogs(
-    @Query() filters: BlogFilter,
+    @Query(PublicBlogsPaginationPipe) filters: IBlogPaginationConfig,
   ): Promise<PaginatedOutput<BlogPresentationModel>> {
+    console.log(filters);
     return await this.bus.execute(new query.GetBlogs(filters));
   }
   @Get(':id')

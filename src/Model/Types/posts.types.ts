@@ -1,4 +1,3 @@
-
 export type PostInputModel = {
   title: string;
   shortDescription: string;
@@ -17,7 +16,10 @@ export type PostLogicModel = {
   createdAt: Date;
 };
 
-export type PostPresentationModel = Omit<PostLogicModel, '_id'> & {
+export type PostPresentationModel = Omit<
+  PostLogicModel,
+  '_id' | 'id' | 'blogId' | 'createdAt'
+> & {
   id: string;
   blogId: string;
   createdAt: string;

@@ -1,14 +1,17 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { NotFoundException } from '@nestjs/common';
-import { PublicQueryRepository } from '../../repos';
 import {
+  ExtendedLikesInfo,
   Nullable,
   PostPresentationModel,
   WithExtendedLike,
 } from '../../../Model';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
+import { TablesENUM } from '../../../Helpers/SQL';
+import { NotFoundException } from '@nestjs/common';
 
 export class GetPost {
-  constructor(public postId: string, public userId: Nullable<string>) {
+  constructor(public postId: string, public userId: Nullable<string | number>) {
     if (!userId) {
       this.userId = null;
     }
@@ -17,15 +20,56 @@ export class GetPost {
 
 @QueryHandler(GetPost)
 export class GetPostUseCase implements IQueryHandler<GetPost> {
-  constructor(private repo: PublicQueryRepository) {}
+  constructor(@InjectDataSource() private ds: DataSource) {}
   public async execute(
     query: GetPost,
   ): Promise<WithExtendedLike<PostPresentationModel>> {
-    // const post = await this.repo.getPostEntity(query.postId);
-    // if (!post || post._isOwnerBanned || post._isBlogBanned) {
-    //   throw new NotFoundException();
-    // }
-    // return await this.repo.getExtendedLikeInfo(post, query.userId);
-    return null;
+    const queryResult = await this.ds.query(
+      `
+SELECT p.*,
+b.name AS "blogName", b."isDeleted" AS "isBlogDeleted", 
+abb.status AS "isBlogBanned", u."isDeleted" AS "isOwnerDeleted", 
+aub.status AS "isOwnerBanned"
+FROM ${TablesENUM.POSTS} AS p
+JOIN ${TablesENUM.BLOGS} AS b
+ON p."blogId" = b.id
+JOIN ${TablesENUM.BLOGS_BAN_LIST_BY_ADMIN} AS abb
+ON abb."blogId" = p."blogId"
+JOIN ${TablesENUM.USERS} AS u
+ON u.id = p."ownerId"
+JOIN ${TablesENUM.USERS_BAN_LIST_BY_ADMIN} AS aub
+ON aub."userId" = p."ownerId"
+WHERE p.id = $1
+    `,
+      [query.postId],
+    );
+    if (queryResult.length <= 0) {
+      throw new NotFoundException();
+    }
+    const raw = queryResult[0];
+    const isDeleted = raw.isDeleted || raw.isBlogDeleted || raw.isUserDeleted;
+    const isBanned = raw.isBlogBanned || raw.isOwnerBanned;
+    if (isDeleted || isBanned) {
+      throw new NotFoundException();
+    }
+    return {
+      id: raw.id.toString(),
+      title: raw.title,
+      shortDescription: raw.shortDescription,
+      content: raw.content,
+      blogId: raw.blogId.toString(),
+      blogName: raw.blogName,
+      createdAt: raw.createdAt,
+      extendedLikesInfo: this.getExtendedLikeInfo(),
+    };
+  }
+
+  private getExtendedLikeInfo(): ExtendedLikesInfo {
+    return {
+      likesCount: 0,
+      dislikesCount: 0,
+      myStatus: 'None',
+      newestLikes: [],
+    };
   }
 }
