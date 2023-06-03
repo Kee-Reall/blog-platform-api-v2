@@ -2,17 +2,16 @@ import { QueryBus } from '@nestjs/cqrs';
 import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
 import { query } from '../useCases';
 import { Meta, SoftJwtGuard } from '../../Base';
+import { PublicBlogsPaginationPipe, PublicPostsPaginationPipe } from '../pipes';
 import {
-  BlogFilter,
   BlogPresentationModel,
   IBlogPaginationConfig,
+  IPaginationConfig,
   PaginatedOutput,
-  PostFilter,
   PostPresentationModel,
   SoftGuardMeta,
   WithExtendedLike,
 } from '../../Model';
-import { PublicBlogsPaginationPipe } from '../pipes/public-blogs.pagination.pipe';
 
 @Controller('blogs')
 export class BlogsController {
@@ -35,7 +34,7 @@ export class BlogsController {
   @UseGuards(SoftJwtGuard)
   public async getPostsByBlogId(
     @Param('id') blogId: string,
-    @Query() filters: PostFilter,
+    @Query(PublicPostsPaginationPipe) filters: IPaginationConfig,
     @Meta() meta: SoftGuardMeta,
   ): Promise<PaginatedOutput<WithExtendedLike<PostPresentationModel>>> {
     return await this.bus.execute(
