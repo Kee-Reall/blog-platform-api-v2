@@ -1,36 +1,23 @@
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  Post,
-  Put,
-  Query,
-  UseGuards,
-} from '@nestjs/common';
-import { command, query } from '../useCases';
+import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
+import { query } from '../useCases';
 //import { CommentInput, LikeInput } from '../validators';
-import { JwtGuard, Meta, SoftJwtGuard } from '../../Base';
-import {
-  AccessTokenMeta,
-  CommentsFilter,
-  PostFilter,
-  SoftGuardMeta,
-} from '../../Model';
+import { Meta, SoftJwtGuard } from '../../Base';
+import { IPaginationConfig, SoftGuardMeta } from '../../Model';
+import { PublicPostsPaginationPipe } from '../pipes';
 
 @Controller('posts')
 export class PostsController {
   constructor(private queryBus: QueryBus, private commandBus: CommandBus) {}
 
-  // @Get()
-  // @UseGuards(SoftJwtGuard)
-  // public async getPosts(
-  //   @Query() filter: PostFilter,
-  //   @Meta() meta: SoftGuardMeta,
-  // ) {
-  //   //return this.queryBus.execute(new query.GetPosts(meta.userId, filter));
-  // }
+  @Get()
+  @UseGuards(SoftJwtGuard)
+  public async getPosts(
+    @Query(PublicPostsPaginationPipe) filter: IPaginationConfig,
+    @Meta() meta: SoftGuardMeta,
+  ) {
+    return this.queryBus.execute(new query.GetPosts(meta.userId, filter));
+  }
 
   @Get(':id')
   @UseGuards(SoftJwtGuard)

@@ -6,15 +6,14 @@ import { isNil } from '@nestjs/common/utils/shared.utils';
 import { TablesENUM } from '../../../Helpers/SQL';
 import { PublicQueryRepository } from '../../repos';
 import {
-  Direction,
-  ExtendedLikesInfo,
   IPaginationConfig,
   Nullable,
   PaginatedOutput,
   PostPresentationModel,
-  sqlQuery,
+  SqlQuery,
   WithExtendedLike,
 } from '../../../Model';
+import { GetPostsAbstract } from '../shared/get-post.class';
 
 export class GetPostsByBlog {
   constructor(
@@ -25,11 +24,16 @@ export class GetPostsByBlog {
 }
 
 @QueryHandler(GetPostsByBlog)
-export class GetPostsByBlogsUseCase implements IQueryHandler<GetPostsByBlog> {
+export class GetPostsByBlogsUseCase
+  extends GetPostsAbstract
+  implements IQueryHandler<GetPostsByBlog>
+{
   constructor(
     @InjectDataSource() private ds: DataSource,
     private repo: PublicQueryRepository,
-  ) {}
+  ) {
+    super();
+  }
   public async execute(
     query: GetPostsByBlog,
   ): Promise<PaginatedOutput<WithExtendedLike<PostPresentationModel>>> {
@@ -45,17 +49,17 @@ export class GetPostsByBlogsUseCase implements IQueryHandler<GetPostsByBlog> {
       throw new NotFoundException();
     }
 
-    const queryString: sqlQuery = `
+    const queryString: SqlQuery = `
 SELECT 
 p.id::VARCHAR, p.title, p."shortDescription", p.content, p."blogId"::VARCHAR, p."createdAt", b.name as "blogName"
 FROM ${TablesENUM.POSTS} AS p
 JOIN ${TablesENUM.BLOGS} AS b
 ON b.id = p."blogId"
 WHERE p."isDeleted" = false AND b.id = $1
-${this.generateOrder(query.filter.sortBy, query.filter.sortDirection)}
+${this.generatePostOrder(query.filter.sortBy, query.filter.sortDirection)}
 LIMIT $2 OFFSET $3
     `;
-    const totalCountQuery: sqlQuery = `
+    const totalCountQuery: SqlQuery = `
 SELECT COUNT(*)::INTEGER AS "totalCount"
 FROM ${TablesENUM.POSTS} AS p
 JOIN ${TablesENUM.BLOGS} AS b
@@ -81,47 +85,5 @@ WHERE p."isDeleted" = false AND b.id = $1
       totalCount,
       items,
     };
-  }
-
-  private getExtendedLikeInfo(): ExtendedLikesInfo {
-    return {
-      likesCount: 0,
-      dislikesCount: 0,
-      myStatus: 'None',
-      newestLikes: [],
-    };
-  }
-
-  private generateOrder(
-    orderBy: keyof PostPresentationModel | string,
-    direction: Direction,
-  ): string {
-    let str = 'ORDER BY ';
-    switch (orderBy) {
-      case 'blogId':
-        str += `p."blogId`;
-        break;
-      case 'id':
-        str += `p.id`;
-        break;
-      case 'content':
-        str += `p.content`;
-        break;
-      case 'blogName':
-        str += 'b."blogName"';
-        break;
-      case 'shortDescription':
-        str += 'p."shortDescription"';
-        break;
-      case 'title':
-        str += 'p.title';
-        break;
-      default:
-        str += 'p."createdAt"';
-        break;
-    }
-    direction = direction.toLowerCase() === 'asc' ? direction : 'DESC';
-    str += ` ${direction}`;
-    return str;
   }
 }

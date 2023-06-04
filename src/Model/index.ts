@@ -1,3 +1,3 @@
 export * from './Types';
 
-export type sqlQuery = string;
+export type SqlQuery = string;

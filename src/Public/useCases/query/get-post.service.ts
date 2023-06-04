@@ -1,6 +1,5 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import {
-  ExtendedLikesInfo,
   Nullable,
   PostPresentationModel,
   WithExtendedLike,
@@ -9,6 +8,7 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { TablesENUM } from '../../../Helpers/SQL';
 import { NotFoundException } from '@nestjs/common';
+import { GetPostsAbstract } from '../shared/get-post.class';
 
 export class GetPost {
   constructor(public postId: string, public userId: Nullable<string | number>) {
@@ -19,8 +19,13 @@ export class GetPost {
 }
 
 @QueryHandler(GetPost)
-export class GetPostUseCase implements IQueryHandler<GetPost> {
-  constructor(@InjectDataSource() private ds: DataSource) {}
+export class GetPostUseCase
+  extends GetPostsAbstract
+  implements IQueryHandler<GetPost>
+{
+  constructor(@InjectDataSource() private ds: DataSource) {
+    super();
+  }
   public async execute(
     query: GetPost,
   ): Promise<WithExtendedLike<PostPresentationModel>> {
@@ -61,15 +66,6 @@ WHERE p.id = $1
       blogName: raw.blogName,
       createdAt: raw.createdAt,
       extendedLikesInfo: this.getExtendedLikeInfo(),
-    };
-  }
-
-  private getExtendedLikeInfo(): ExtendedLikesInfo {
-    return {
-      likesCount: 0,
-      dislikesCount: 0,
-      myStatus: 'None',
-      newestLikes: [],
     };
   }
 }

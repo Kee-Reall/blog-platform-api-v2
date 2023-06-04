@@ -1,5 +1,4 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { BloggerQueryRepository } from '../../repos';
 import {
   BlogPresentationModel,
   Direction,
@@ -27,10 +26,7 @@ export class GetPaginatedBlogsUseCase
   implements IQueryHandler<GetPaginatedBlogs>
 {
   private logger = new Logger(this.constructor.name);
-  constructor(
-    @InjectDataSource() private ds: DataSource,
-    private repo: BloggerQueryRepository,
-  ) {}
+  constructor(@InjectDataSource() private ds: DataSource) {}
   public async execute(query: GetPaginatedBlogs) {
     try {
       const dbQueryResult = await this.ds.query(
@@ -38,7 +34,7 @@ export class GetPaginatedBlogsUseCase
 SELECT 
 id::VARCHAR, name, description, "websiteUrl", "createdAt", "isMembership"
 FROM ${TablesENUM.BLOGS}
-WHERE "ownerId" = $1 AND name ILIKE '%' || COALESCE($2,'') || '%'
+WHERE "ownerId" = $1 AND name ILIKE '%' || COALESCE($2,'') || '%' AND "isDeleted" = false
 ${this.generateOrder(query.sortBy, query.sortDirection)}
 LIMIT $3 OFFSET $4
     `,
@@ -50,12 +46,11 @@ LIMIT $3 OFFSET $4
         `
 SELECT COUNT(*)::INT
 FROM ${TablesENUM.BLOGS}
-WHERE "ownerId" = $1 AND name ILIKE '%' || COALESCE($2,'') || '%'
+WHERE "ownerId" = $1 AND name ILIKE '%' || COALESCE($2,'') || '%' AND "isDeleted" = false
     `,
         [query.userId, query.searchNameTerm],
       );
       const totalCount = dbCountResult[0].count;
-      console.log(query.limit);
       return {
         pagesCount: Math.ceil(totalCount / query.limit),
         page: query.pageNumber,
@@ -63,8 +58,6 @@ WHERE "ownerId" = $1 AND name ILIKE '%' || COALESCE($2,'') || '%'
         totalCount,
         items,
       };
-
-      this.logger.verbose(dbQueryResult);
     } catch (e) {
       this.logger.error(e);
     }
