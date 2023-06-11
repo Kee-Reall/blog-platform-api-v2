@@ -19,7 +19,7 @@ import {
   VoidPromise,
 } from '../../Model';
 
-@Controller('api/blogger/users')
+@Controller('blogger/users')
 @UseGuards(JwtGuard)
 export class BloggerUsersController {
   constructor(private queryBus: QueryBus, private commandBus: CommandBus) {}
@@ -44,6 +44,7 @@ export class BloggerUsersController {
     @Body() dto: BunUserForBlogInput,
     @Meta() meta: AccessTokenMeta,
   ): VoidPromise {
+    console.log('work');
     return this.commandBus.execute(
       new bloggerCommands.BanUserForBlog(meta.userId, userId, dto),
     );

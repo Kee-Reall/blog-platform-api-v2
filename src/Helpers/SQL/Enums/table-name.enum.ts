@@ -7,4 +7,5 @@ export enum TablesENUM {
   SESSIONS = `"Sessions"`,
   BLOGS = `"Blogs"`,
   BLOGS_BAN_LIST_BY_ADMIN = `"AdminBlogsBans"`,
+  BLOGGER_BAN_LIST = `"BloggerBans"`,
 }

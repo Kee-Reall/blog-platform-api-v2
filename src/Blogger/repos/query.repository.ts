@@ -9,6 +9,7 @@ import {
   NullablePromise,
   PostPresentationModel,
   PostWithExtended,
+  SqlQuery,
   WithExtendedLike,
 } from '../../Model';
 import { isUndefined } from '@nestjs/common/utils/shared.utils';
@@ -58,7 +59,7 @@ WHERE b.id = $1
         return null;
       }
       const rawBlog = queryResult[0];
-      const blog: BlogWithExtended = {
+      return {
         id: rawBlog.id,
         name: rawBlog.name,
         description: rawBlog.description,
@@ -72,8 +73,7 @@ WHERE b.id = $1
           isDeleted: rawBlog.isDeleted,
           ownerId: rawBlog.ownerId,
         },
-      };
-      return blog;
+      } satisfies BlogWithExtended;
     } catch (e) {
       return null;
     }
@@ -163,7 +163,26 @@ WHERE p.id = $1
     }
   }
 
-  public async getUserBan(userId: number, blogId: number) {
-    return;
+  public async getUserBan(
+    ownerId: number | string,
+    userId: number | string,
+    blogId: number | string,
+  ) {
+    const query: SqlQuery = await this.ds.query(
+      `
+SELECT bbl.*
+FROM ${TablesENUM.BLOGGER_BAN_LIST} as bbl
+JOIN ${TablesENUM.BLOGS} as b
+ON bbl."blogId" = b.id
+WHERE (
+  bbl."blogId" = $1 and
+  bbl."userId" = $2 and
+  b."ownerId" = $3
+)
+    `,
+      [blogId, userId, ownerId],
+    );
+    console.log(query);
+    return query;
   }
 }

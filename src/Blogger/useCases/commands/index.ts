@@ -8,6 +8,7 @@ import {
   BanUserForBlog,
   BloggerBanUserUseCase,
 } from './ban-user-for-blog.service';
+import { InjectionToken } from '@nestjs/common';
 
 export const bloggerCommands = {
   BanUserForBlog,
@@ -28,3 +29,5 @@ export const bloggerCommandsHandlers = [
   DeleteBlogUseCase,
   DeletePostUseCase,
 ];
+
+export const BLOGGER_COMAND_TOKEN: InjectionToken = 'BLOGGER_COMMANDS';

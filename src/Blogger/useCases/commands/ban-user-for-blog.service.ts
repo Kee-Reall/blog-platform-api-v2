@@ -9,7 +9,7 @@ export class BanUserForBlog implements BanUserForBlogInputModel {
   public isBanned: boolean;
 
   constructor(
-    public ownerId: string | number,
+    public makerId: string | number,
     public userId: string,
     dto: BanUserForBlogInputModel,
   ) {
@@ -26,6 +26,12 @@ export class BloggerBanUserUseCase implements ICommandHandler<BanUserForBlog> {
     private commandRepo: BloggerCommandRepository,
   ) {}
   public async execute(command: BanUserForBlog): VoidPromise {
+    console.log(command);
+    const banInfo = await this.queryRepo.getUserBan(
+      command.makerId,
+      command.userId,
+      command.blogId,
+    );
     // const ban: BanDocument = await this.queryRepo.getBanEntity(
     //   command.ownerId,
     //   command.userId,

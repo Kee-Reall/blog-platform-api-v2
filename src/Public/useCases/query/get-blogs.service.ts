@@ -1,13 +1,13 @@
+import { DataSource } from 'typeorm';
+import { InjectDataSource } from '@nestjs/typeorm';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
+import { TablesENUM } from '../../../Helpers/SQL';
 import {
   BlogPresentationModel,
   Direction,
   IBlogPaginationConfig,
   PaginatedOutput,
 } from '../../../Model';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
-import { TablesENUM } from '../../../Helpers/SQL';
 
 export class GetBlogs {
   constructor(public filter: IBlogPaginationConfig) {}
